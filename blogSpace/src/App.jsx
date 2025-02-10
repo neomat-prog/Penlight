@@ -1,34 +1,26 @@
 import { useState } from "react";
 import "./App.css";
+import PostForm from "./components/PostForm";
 
 const App = () => {
   const [post, setPost] = useState("");
   const [posts, setPosts] = useState([]);
-  
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    if (post.trim() !== "") {
-      setPosts([...posts, post]);
-      setPost("");
-    }
-
-  };
 
   return (
     <div>
       <h1 className="text-blue-500 font-bold">BlogSpace</h1>
-      <form onSubmit={handleSubmit}>
-        <input type="text" onChange={(e) => setPost(e.target.value)} placeholder="Anything on your mind?" value={post} className="border rounded p-2 w-full mb-2"/>
-        <button type="submit" className="bg-blue-500 text-white px-4 py-2 rounded">
-          Post It!
-        </button>
-      </form>
+      <PostForm post={post} posts={posts} setPost={setPost} setPosts={setPosts}/>
       <div>
         <h2>Your Posts:</h2>
-        <ul>{posts.map((n, index) => (
-           <li key={index}>{n}</li>
-          
-        ))}</ul>
+        {posts.length > 0  ? (
+          <ul>{posts.map((n, index) => (
+            <li key={index}>{n}</li>
+           
+         ))}</ul>
+        ) : (
+          <p className="text-gray-500 mt-2">No posts yet. Share your thoughts!</p>
+        )} 
+        
       </div>
     </div>
   );
