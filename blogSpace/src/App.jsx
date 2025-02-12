@@ -1,27 +1,101 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import "./App.css";
+import axios from "axios";
 import PostForm from "./components/PostForm";
+import PostList from "./components/PostList";
+import LogInForm from "./components/LogInForm";
+import RegisterForm from "./components/RegisterForm";
 
 const App = () => {
-  const [post, setPost] = useState("");
   const [posts, setPosts] = useState([]);
+  const [username, setUsername] = useState("");
+  const [loggedIn, setLoggedIn] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [showRegister, setShowRegister] = useState(false);
+
+  // Check for logged-in user on mount
+  useEffect(() => {
+    const userData = JSON.parse(localStorage.getItem("user"));
+    if (userData) {
+      setLoggedIn(true);
+      setUsername(userData.username);
+    }
+  }, []);
+
+  // Fetch posts on mount
+  useEffect(() => {
+    const fetchPosts = async () => {
+      setLoading(true);
+      try {
+        const response = await axios.get("http://localhost:3001/posts");
+        setPosts(response.data);  // Store fetched posts in state
+      } catch (error) {
+        console.error("Error fetching posts:", error);
+        setError(error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchPosts();
+  }, []);
+
+  // Function to add a new post to the state
+  const handleNewPost = (newPost) => {
+    setPosts((prevPosts) => [newPost, ...prevPosts]); // Append new post to the existing posts
+  };
 
   return (
-    <div>
-      <h1 className="text-blue-500 font-bold">BlogSpace</h1>
-      <PostForm post={post} posts={posts} setPost={setPost} setPosts={setPosts}/>
-      <div>
-        <h2>Your Posts:</h2>
-        {posts.length > 0  ? (
-          <ul>{posts.map((n, index) => (
-            <li key={index}>{n}</li>
-           
-         ))}</ul>
-        ) : (
-          <p className="text-gray-500 mt-2">No posts yet. Share your thoughts!</p>
-        )} 
-        
-      </div>
+    <div className="bg-gray-50 min-h-screen font-serif">
+      <nav className="bg-white shadow-md py-6">
+        <div className="max-w-5xl mx-auto px-4 flex justify-between items-center">
+          <h1 className="text-4xl text-black font-bold">BlogSpace</h1>
+          <div className="text-gray-500 text-lg">@{username}</div>
+        </div>
+      </nav>
+
+      <main className="max-w-4xl mx-auto px-4 mt-12">
+      {loggedIn ? (
+        <PostForm onNewPost={handleNewPost} />
+      ) : (
+        <div className="text-center">
+          <h1 className="text-2xl font-bold mb-4">
+            {showRegister ? "Register to Post" : "Log In to Post"}
+          </h1>
+          {showRegister ? (
+            <RegisterForm setLoggedIn={setLoggedIn} setUsername={setUsername} />
+          ) : (
+            <LogInForm setLoggedIn={setLoggedIn} setUsername={setUsername} />
+          )}
+          <button
+            className="mt-4 text-blue-500 hover:underline"
+            onClick={() => setShowRegister(!showRegister)}
+          >
+            {showRegister ? "Already have an account? Log in" : "Don't have an account? Register"}
+          </button>
+        </div>
+      )}
+
+        <section className="mt-16">
+          <h2 className="text-4xl font-semibold text-gray-900 mb-8">Latest Posts</h2>
+          {loading ? (
+            <div className="text-center py-12">
+              <p className="text-gray-500 text-xl">Loading...</p>
+            </div>
+          ) : error ? (
+            <div className="text-center py-12">
+              <p className="text-red-500 text-xl">Error fetching posts. Please try again later.</p>
+            </div>
+          ) : posts.length > 0 ? (
+            <PostList posts={posts} username={username} />
+          ) : (
+            <div className="text-center py-12">
+              <p className="text-gray-500 text-xl">Nothing to show yet. Be the first to share something!</p>
+            </div>
+          )}
+        </section>
+      </main>
     </div>
   );
 };
