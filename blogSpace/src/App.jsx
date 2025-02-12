@@ -5,6 +5,7 @@ import PostForm from "./components/PostForm";
 import PostList from "./components/PostList";
 import LogInForm from "./components/LogInForm";
 import RegisterForm from "./components/RegisterForm";
+import LogOut from "./components/LogOut";
 
 const App = () => {
   const [posts, setPosts] = useState([]);
@@ -13,6 +14,11 @@ const App = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [showRegister, setShowRegister] = useState(false);
+
+  const handleLogOut = () => {
+    setLoggedIn(false);
+    setUsername("");
+  };
 
   // Check for logged-in user on mount
   useEffect(() => {
@@ -57,7 +63,10 @@ const App = () => {
 
       <main className="max-w-4xl mx-auto px-4 mt-12">
       {loggedIn ? (
-        <PostForm onNewPost={handleNewPost} />
+        <div>
+          <PostForm onNewPost={handleNewPost} />
+          <LogOut onLogOut={handleLogOut} />
+        </div>
       ) : (
         <div className="text-center">
           <h1 className="text-2xl font-bold mb-4">
@@ -88,7 +97,7 @@ const App = () => {
               <p className="text-red-500 text-xl">Error fetching posts. Please try again later.</p>
             </div>
           ) : posts.length > 0 ? (
-            <PostList posts={posts} username={username} />
+            <PostList posts={posts} />
           ) : (
             <div className="text-center py-12">
               <p className="text-gray-500 text-xl">Nothing to show yet. Be the first to share something!</p>
