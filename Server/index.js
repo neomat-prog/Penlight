@@ -11,8 +11,6 @@ const app = express();
 const PORT = process.env.PORT || 3001;
 const URI = process.env.MONGODB_URI;
 
-
-
 app.use(cors());
 
 app.use(express.json());
@@ -27,7 +25,6 @@ app.get("/", (req, res) => {
   res.send("Welcome to the Blog API running on PORT 3001");
 });
 
-// Create post (protected route)
 app.post("/create-post", authMiddleware, async (req, res) => {
   const { title, content } = req.body;
 
@@ -49,16 +46,13 @@ app.post("/create-post", authMiddleware, async (req, res) => {
 
     const savedPost = await newPost.save();
 
-    // Add the post to the user's posts array
     user.posts.push(savedPost._id);
     await user.save();
 
-    // Populate the 'author' field with the 'username'
     const postWithAuthor = await Post.findById(savedPost._id)
-      .populate("author", "username") // Populating the author field with the username
+      .populate("author", "username")
       .exec();
 
-    // Respond with the populated post
     res.status(201).json(postWithAuthor);
   } catch (error) {
     console.error(error);
@@ -66,9 +60,29 @@ app.post("/create-post", authMiddleware, async (req, res) => {
   }
 });
 
+app.delete("/posts/:id", authMiddleware, async (req, res) => {
+  try {
+    const postId = req.params.id;
+    if (!mongoose.Types.ObjectId.isValid(postId)) {
+      return res.status(400).json({ message: "Invalid post ID" });
+    }
+    const post = await Post.findById(postId);
+    if (!post) {
+      return res.status(404).json({ message: "Post not found" });
+    }
+    if (post.author.toString() !== req.userId) {
+      return res
+        .status(403)
+        .json({ message: "You are not authorized to delete this post" });
+    }
+    await Post.findByIdAndDelete(postId);
+    await User.findByIdAndUpdate(req.userId, { $pull: { posts: postId } });
+    res.status(200).json({ message: "Post deleted successfully" });
+  } catch (error) {
+    res.status(500).json(message, "Failed to delete post");
+  }
+});
 
-
-// Get all posts with author details
 app.get("/posts", async (req, res) => {
   try {
     const posts = await Post.find().populate("author", "username name");
@@ -76,6 +90,30 @@ app.get("/posts", async (req, res) => {
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Failed to retrieve posts" });
+  }
+});
+
+app.get("/posts/:id", async (req, res) => {
+  try {
+    const postId = req.params.id;
+
+    if (!mongoose.Types.ObjectId.isValid(postId)) {
+      return res.status(400).json({ message: "Invalid post ID" });
+    }
+
+    const post = await Post.findById(postId).populate(
+      "author",
+      "username name"
+    );
+
+    if (!post) {
+      return res.status(404).json({ message: "Post not found" });
+    }
+
+    res.json(post);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Failed to retrieve post" });
   }
 });
 

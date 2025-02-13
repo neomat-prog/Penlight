@@ -17,7 +17,8 @@
     "jsonwebtoken": "^9.0.2",
     "mongodb": "^6.13.0",
     "mongoose": "^8.10.0",
-    "nodemon": "^3.1.9"
+    "nodemon": "^3.1.9",
+    "react-router": "^7.1.5"
   },
   "author": "",
   "license": "ISC"
