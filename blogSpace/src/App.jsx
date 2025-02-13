@@ -1,3 +1,4 @@
+// App.jsx
 import { useState, useEffect } from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import "./App.css";
@@ -13,9 +14,21 @@ const App = () => {
   const [posts, setPosts] = useState([]);
   const [username, setUsername] = useState("");
   const [loggedIn, setLoggedIn] = useState(false);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [showRegister, setShowRegister] = useState(false);
+
+  useEffect(() => {
+    const authToken = localStorage.getItem("authToken");
+    const userData = JSON.parse(localStorage.getItem("user"));
+
+    if (authToken && userData) {
+      setLoggedIn(true);
+      setUsername(userData.username);
+    }
+    setLoading(false); // Ensure we stop showing the loading state after the check
+  }, []);
+
   const handleLogOut = () => {
     setLoggedIn(false);
     setUsername("");
@@ -23,11 +36,9 @@ const App = () => {
     localStorage.removeItem("authToken");
   };
 
-
   const handleDeletePost = (postId) => {
     setPosts((prevPosts) => prevPosts.filter((post) => post._id !== postId));
   };
-
 
   useEffect(() => {
     const fetchPosts = async () => {
@@ -42,13 +53,21 @@ const App = () => {
         setLoading(false);
       }
     };
+
     fetchPosts();
   }, []);
-
 
   const handleNewPost = (newPost) => {
     setPosts((prevPosts) => [newPost, ...prevPosts]);
   };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <p className="text-gray-600 text-lg">Loading...</p>
+      </div>
+    );
+  }
 
   return (
     <Router>
@@ -123,7 +142,8 @@ const App = () => {
                       posts={posts}
                       loading={loading}
                       error={error}
-                      onDelete={handleDeletePost} 
+                      onDelete={handleDeletePost}
+                      loggedIn={loggedIn}
                     />
                   </section>
                 </>
