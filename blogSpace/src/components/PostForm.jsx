@@ -1,84 +1,80 @@
-import React, { useState } from 'react';
+// PostForm.jsx
+import { useState } from 'react';
 import axios from 'axios';
 
-const PostForm = ({ onNewPost }) => {
-  const [title, setTitle] = useState('');
-  const [content, setContent] = useState('');
-  const [error, setError] = useState('');
+const PostForm = ({ onNewPost, onClose }) => {
+  const [formData, setFormData] = useState({ title: "", content: "" });
+  const [error, setError] = useState("");
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
-    if (!title || !content) {
-      setError("Both title and content are required.");
-      return;
-    }
-
-    // Get the auth token from localStorage
-    const token = localStorage.getItem("authToken");
-
-    if (!token) {
-      setError("You must be logged in to post.");
-      return;
-    }
-
     try {
-      // Send post data to backend API
+      const authToken = localStorage.getItem("authToken");
       const response = await axios.post(
-        'http://localhost:3001/create-post',
-        { title, content },
+        "http://localhost:3001/create-post",
+        formData,
         {
           headers: {
-            Authorization: `Bearer ${token}` // Include the token in the Authorization header
-          }
+            Authorization: `Bearer ${authToken}`,
+          },
         }
       );
-
-      // Handle new post submission
       onNewPost(response.data);
-
-      // Clear input fields after successful submission
-      setTitle('');
-      setContent('');
-      setError('');
-    } catch (error) {
-      setError("Failed to create post. Please try again later.");
+      setFormData({ title: "", content: "" });
+      setError("");
+    } catch (err) {
+      setError(err.response?.data?.message || "Error creating post");
+      console.error("Post creation error:", err);
     }
   };
 
   return (
-    <div className="bg-white p-6 shadow-lg rounded-lg">
-      <h2 className="text-3xl font-semibold mb-4">Create a New Post</h2>
-      {error && <div className="text-red-500 mb-4">{error}</div>}
-      
-      <form onSubmit={handleSubmit}>
-        <div className="mb-4">
-          <label className="block text-lg" htmlFor="title">Title</label>
-          <input
-            type="text"
-            id="title"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            className="w-full px-4 py-2 border rounded-lg"
-            placeholder="Enter the title of your post"
-          />
-        </div>
+    <form onSubmit={handleSubmit} className="space-y-6">
+      <div>
+        <label htmlFor="title" className="block text-sm font-medium text-gray-700 mb-2">
+          Title
+        </label>
+        <input
+          type="text"
+          id="title"
+          value={formData.title}
+          onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+          required
+        />
+      </div>
 
-        <div className="mb-4">
-          <label className="block text-lg" htmlFor="content">Content</label>
-          <textarea
-            id="content"
-            value={content}
-            onChange={(e) => setContent(e.target.value)}
-            className="w-full px-4 py-2 border rounded-lg"
-            placeholder="Enter the content of your post"
-            rows="6"
-          />
-        </div>
+      <div>
+        <label htmlFor="content" className="block text-sm font-medium text-gray-700 mb-2">
+          Content
+        </label>
+        <textarea
+          id="content"
+          value={formData.content}
+          onChange={(e) => setFormData({ ...formData, content: e.target.value })}
+          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 h-48"
+          required
+        />
+      </div>
 
-        <button type="submit" className="bg-blue-500 text-white py-2 px-6 rounded-lg">Submit Post</button>
-      </form>
-    </div>
+      {error && <p className="text-red-500 text-sm">{error}</p>}
+
+      <div className="flex justify-end gap-4">
+        <button
+          type="button"
+          onClick={onClose}
+          className="px-6 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
+        >
+          Cancel
+        </button>
+        <button
+          type="submit"
+          className="px-6 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
+        >
+          Create Post
+        </button>
+      </div>
+    </form>
   );
 };
 

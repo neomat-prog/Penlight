@@ -2,7 +2,7 @@ import PropTypes from "prop-types";
 import { Link } from "react-router-dom";
 import PostDelete from "./PostDelete";
 
-const PostList = ({ posts, loading, error }) => {
+const PostList = ({ posts, loading, error, onDelete }) => {
   if (loading) {
     return <p className="text-center py-12 text-gray-500 text-xl">Loading...</p>;
   }
@@ -42,7 +42,7 @@ const PostList = ({ posts, loading, error }) => {
                 Posted by @{post.author?.username || "Anonymous"}
               </span>
               <span>
-                <PostDelete postId={post._id} />
+                <PostDelete postId={post._id} onDelete={onDelete} />
               </span>
             </div>
           </article>
@@ -60,6 +60,7 @@ PostList.propTypes = {
   posts: PropTypes.array.isRequired,
   loading: PropTypes.bool.isRequired,
   error: PropTypes.object,
+  onDelete: PropTypes.func.isRequired, 
 };
 
 export default PostList;

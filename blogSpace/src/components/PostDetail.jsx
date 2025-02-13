@@ -1,6 +1,8 @@
+// PostDetail.jsx
 import { useParams } from "react-router-dom";
 import axios from "axios";
 import { useState, useEffect } from "react";
+import { motion } from "framer-motion";
 
 const PostDetail = () => {
   const { postId } = useParams();
@@ -19,26 +21,47 @@ const PostDetail = () => {
         setLoading(false);
       }
     };
-
     fetchPost();
   }, [postId]);
 
-  if (loading) return <div>Loading...</div>;
-  if (error) return <div>Error: {error}</div>;
-  if (!post) return <div>Post not found</div>;
+  if (loading) return (
+    <div className="flex justify-center items-center h-64">
+      <div className="animate-spin rounded-full h-12 w-12 border-4 border-indigo-600 border-t-transparent" />
+    </div>
+  );
+  
+  if (error) return (
+    <div className="p-6 bg-red-50 rounded-lg text-red-700 border border-red-200">
+      ⚠️ Error loading post: {error}
+    </div>
+  );
+  
+  if (!post) return (
+    <div className="p-6 bg-yellow-50 rounded-lg text-yellow-700 border border-yellow-200">
+      Post not found
+    </div>
+  );
 
   return (
-    <div className="max-w-4xl mx-auto px-4 mt-12">
-      <article className="bg-white rounded-xl shadow-xl p-8">
-        <h1 className="text-4xl font-bold mb-6">{post.title}</h1>
-        <p className="text-xl text-gray-600 mb-8">{post.content}</p>
-        <div className="border-t pt-4">
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      className="max-w-3xl mx-auto px-4"
+    >
+      <article className="bg-white rounded-2xl shadow-xl p-8 border border-gray-100">
+        <h1 className="text-4xl font-bold text-gray-900 mb-6">{post.title}</h1>
+        <div className="prose-lg text-gray-600 mb-8">
+          {post.content.split('\n').map((line, i) => (
+            <p key={i} className="mb-4">{line}</p>
+          ))}
+        </div>
+        <div className="border-t pt-6">
           <p className="text-sm text-gray-500">
             Posted by @{post.author?.username || "Anonymous"}
           </p>
         </div>
       </article>
-    </div>
+    </motion.div>
   );
 };
 
