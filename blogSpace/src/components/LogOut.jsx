@@ -1,7 +1,7 @@
 const LogOut = ({ onLogOut }) => {
   const handleLogOut = () => {
-    localStorage.removeItem("user"); // Clear user data
-    onLogOut(); // Update parent component state
+    localStorage.removeItem("user"); 
+    onLogOut(); 
   };
 
   return (
