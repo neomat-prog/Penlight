@@ -7,7 +7,9 @@ const PostList = ({ posts, loading, error, onDelete, loggedIn }) => {
   const currentUser = JSON.parse(localStorage.getItem("user")) || {};
 
   if (loading) {
-    return <p className="text-center py-12 text-gray-500 text-xl">Loading...</p>;
+    return (
+      <p className="text-center py-12 text-gray-500 text-xl">Loading...</p>
+    );
   }
 
   if (error) {
@@ -44,14 +46,9 @@ const PostList = ({ posts, loading, error, onDelete, loggedIn }) => {
               <span className="text-sm text-gray-500">
                 Posted by @{post.author?.username || "Anonymous"}
               </span>
-              <span>
-                {loggedIn &&
-                  currentUser?.id &&
-                  post.author?.id &&
-                  currentUser.id === post.author.id && (
-                    <PostDelete postId={post._id} onDelete={onDelete} />
-                  )}
-              </span>
+              {loggedIn && currentUser.username === post.author?.username && (
+                <PostDelete onDelete={onDelete} postId={post._id} />
+              )}
             </div>
           </article>
         ))
