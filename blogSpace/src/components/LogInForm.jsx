@@ -1,7 +1,6 @@
-
+import PropTypes from "prop-types";
 import { useState } from "react";
 import axios from "axios";
-
 
 const LogInForm = ({ setLoggedIn, setUsername }) => {
   const [username, setUsernameInput] = useState("");
@@ -11,17 +10,20 @@ const LogInForm = ({ setLoggedIn, setUsername }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.post(
-        "http://localhost:3001/users/login",
-        { username, password }
-      );
+      const response = await axios.post("http://localhost:3001/users/login", {
+        username,
+        password,
+      });
 
       localStorage.setItem("authToken", response.data.token);
-      localStorage.setItem("user", JSON.stringify({
-        id: response.data.userId,
-        username: response.data.username,
-        name: response.data.name
-      }));
+      localStorage.setItem(
+        "user",
+        JSON.stringify({
+          id: response.data.userId,
+          username: response.data.username,
+          name: response.data.name,
+        })
+      );
 
       setLoggedIn(true);
       setUsername(response.data.username);
@@ -71,4 +73,9 @@ const LogInForm = ({ setLoggedIn, setUsername }) => {
   );
 };
 
-export default LogInForm; 
+export default LogInForm;
+
+LogInForm.PropTypes = {
+  setLoggedIn: PropTypes.bool.isRequired,
+  setUsername: PropTypes.string.isRequired,
+};
