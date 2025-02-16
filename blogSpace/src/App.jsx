@@ -1,6 +1,10 @@
-// App.jsx
 import { useState, useEffect } from "react";
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  useNavigate,
+} from "react-router-dom"; // Import useNavigate
 import "./App.css";
 import axios from "axios";
 import PostList from "./components/PostList";
@@ -76,27 +80,12 @@ const App = () => {
   return (
     <Router>
       <div className="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100 font-sans">
-        <nav className="sticky top-0 z-50 bg-white/80 backdrop-blur-sm border-b border-gray-200 shadow-sm">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex items-center justify-between h-16">
-              <h1 className="text-3xl font-bold bg-gradient-to-r from-indigo-600 to-blue-500 bg-clip-text text-transparent">
-                BlogWave
-              </h1>
-              <div className="flex items-center gap-4">
-                {loggedIn && <CreatePost onNewPost={handleNewPost} />}
-                {loggedIn && (
-                  <div className="flex items-center gap-3">
-                    <span className="text-sm font-medium text-gray-700">
-                      @{username}
-                    </span>
-                    <LogOut onLogOut={handleLogOut} />
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
-        </nav>
-
+        <NavBar
+          loggedIn={loggedIn}
+          username={username}
+          onLogOut={handleLogOut}
+          onNewPost={handleNewPost}
+        />
         <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <Routes>
             <Route
@@ -154,7 +143,10 @@ const App = () => {
                 </>
               }
             />
-            <Route path="/posts/:postId" element={<PostDetail />} />
+            <Route
+              path="/posts/:postId"
+              element={<PostDetail loggedIn={loggedIn} />}
+            />
           </Routes>
         </main>
 
@@ -167,6 +159,38 @@ const App = () => {
         </footer>
       </div>
     </Router>
+  );
+};
+
+// NavBar Component
+const NavBar = ({ loggedIn, username, onLogOut, onNewPost }) => {
+  const navigate = useNavigate(); // Use the useNavigate hook
+
+  return (
+    <nav className="sticky top-0 z-50 bg-white/80 backdrop-blur-sm border-b border-gray-200 shadow-sm">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex items-center justify-between h-16">
+          {/* Make the BlogWave title a button that redirects to the home page */}
+          <button
+            onClick={() => navigate("/")} // Navigate to the home page
+            className="text-3xl font-bold bg-gradient-to-r from-indigo-600 to-blue-500 bg-clip-text text-transparent hover:from-blue-600 hover:to-indigo-700 transition-all"
+          >
+            BlogWave
+          </button>
+          <div className="flex items-center gap-4">
+            {loggedIn && <CreatePost onNewPost={onNewPost} />}
+            {loggedIn && (
+              <div className="flex items-center gap-3">
+                <span className="text-sm font-medium text-gray-700">
+                  @{username}
+                </span>
+                <LogOut onLogOut={onLogOut} />
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    </nav>
   );
 };
 

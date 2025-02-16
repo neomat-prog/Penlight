@@ -3,18 +3,24 @@ import axios from "axios";
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import PostComment from "./PostComment";
+import DeleteComment from "./DeleteComment";
 
-const PostDetail = () => {
+const PostDetail = ({ loggedIn }) => {
   const { postId } = useParams();
   const [post, setPost] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [comments, setComments] = useState([]);
 
+  // Get the current user from localStorage
+  const currentUser = JSON.parse(localStorage.getItem("user")) || {};
+
   useEffect(() => {
     const fetchPost = async () => {
       try {
-        const response = await axios.get(`http://localhost:3001/posts/${postId}`);
+        const response = await axios.get(
+          `http://localhost:3001/posts/${postId}`
+        );
         setPost(response.data);
         setComments(response.data.comments || []);
       } catch (err) {
@@ -23,12 +29,18 @@ const PostDetail = () => {
         setLoading(false);
       }
     };
-  
+
     fetchPost();
   }, [postId]);
 
   const handleNewComment = (newComment) => {
     setComments((prev) => [newComment, ...prev]); // Add new comment to state
+  };
+
+  const handleDeleteComment = (deletedCommentId) => {
+    setComments((prevComments) =>
+      prevComments.filter((comment) => comment._id !== deletedCommentId)
+    );
   };
 
   if (loading)
@@ -62,7 +74,9 @@ const PostDetail = () => {
         <h1 className="text-4xl font-bold text-gray-900 mb-6">{post.title}</h1>
         <div className="prose-lg text-gray-600 mb-8">
           {post.content.split("\n").map((line, i) => (
-            <p key={i} className="mb-4">{line}</p>
+            <p key={i} className="mb-4">
+              {line}
+            </p>
           ))}
         </div>
         <div className="border-t pt-6">
@@ -73,25 +87,38 @@ const PostDetail = () => {
       </article>
 
       {/* Comment Form */}
-      <PostComment postId={postId}  onNewComment={handleNewComment} />
+      <PostComment postId={postId} onNewComment={handleNewComment} />
 
       {/* Render Comments */}
       <div className="mt-8">
         <h2 className="text-2xl font-semibold mb-4">Comments</h2>
         {comments.length > 0 ? (
           <ul className="space-y-4">
-          {comments.map((comment, index) => (
-            <li key={comment._id || `comment-${index}`} className="bg-gray-50 p-4 rounded-lg shadow">
-              <p className="text-gray-700">{comment.content}</p>
-              <span className="text-sm text-gray-500">
-                — @{comment.author?.username || "Anonymous"}
-              </span>
-            </li>
-          ))}
-        </ul>
-        
+            {comments.map((comment, index) => (
+              <li
+                key={comment._id || `comment-${index}`}
+                className="bg-gray-50 p-4 rounded-lg shadow"
+              >
+                <p className="text-gray-700">{comment.content}</p>
+
+                {/* Show DeleteComment button if the logged-in user is the comment author */}
+                {loggedIn && currentUser.username === comment.author?.username && (
+                  <DeleteComment
+                    commentId={comment._id}
+                    onDelete={handleDeleteComment}
+                  />
+                )}
+
+                <span className="text-sm text-gray-500">
+                  — @{comment.author?.username || "Anonymous"}
+                </span>
+              </li>
+            ))}
+          </ul>
         ) : (
-          <p className="text-gray-500">No comments yet. Be the first to comment!</p>
+          <p className="text-gray-500">
+            No comments yet. Be the first to comment!
+          </p>
         )}
       </div>
     </motion.div>

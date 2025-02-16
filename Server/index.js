@@ -138,7 +138,7 @@ app.get("/posts/:id", async (req, res) => {
       .populate("author", "username name")
       .populate({
         path: "comments",
-        populate: { path: "author", select: "username" }
+        populate: { path: "author", select: "username" },
       });
 
     if (!post) {
@@ -149,6 +149,72 @@ app.get("/posts/:id", async (req, res) => {
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Failed to retrieve post" });
+  }
+});
+
+app.delete("/comments/:id", authMiddleware, async (req, res) => {
+  try {
+    const commentId = req.params.id;
+
+    // Validate the comment ID
+    if (!mongoose.Types.ObjectId.isValid(commentId)) {
+      return res.status(400).json({ message: "Invalid comment ID" });
+    }
+
+    // Find the comment by ID
+    const comment = await Comment.findById(commentId);
+    if (!comment) {
+      return res.status(404).json({ message: "Comment not found" });
+    }
+
+    // Check if the authenticated user is the author of the comment
+    if (comment.author.toString() !== req.userId) {
+      return res.status(403).json({ message: "Unauthorized to delete this comment" });
+    }
+
+    // Delete the comment
+    await Comment.findByIdAndDelete(commentId);
+
+    // Remove the comment ID from the associated post's comments array
+    await Post.findByIdAndUpdate(comment.post, {
+      $pull: { comments: commentId },
+    });
+
+    res.status(200).json({ message: "Comment deleted successfully" });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Failed to delete comment" });
+  }
+});
+
+// GET COMMENTS
+
+app.get("/comments/:id", authMiddleware, async (req, res) => {
+  try {
+    const commentId = req.params.id;
+
+    if (!mongoose.Types.ObjectId.isValid(commentId)) {
+      return res.status(400).json({
+        message: "Invalid comment ID",
+      });
+    }
+
+    const comment = await Comment.findById(commentId)
+      .populate("author", "username name")
+      .populate("post", "title");
+
+    if (!comment) {
+      return res.status(404).json({
+        message: "Comment not found",
+      });
+    }
+
+    res.json(comment);
+  } catch (error) {
+    console.error("Error fetching comment:", error);
+    res.status(500).json({
+      message: "Failed to retrieve comment",
+    });
   }
 });
 
