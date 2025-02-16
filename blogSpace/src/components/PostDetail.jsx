@@ -5,13 +5,15 @@ import { motion } from "framer-motion";
 import PostComment from "./PostComment";
 import DeleteComment from "./DeleteComment";
 
-const PostDetail = () => {
+const PostDetail = ({ loggedIn }) => {
   const { postId } = useParams();
-  const { commentId } = useParams();
   const [post, setPost] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [comments, setComments] = useState([]);
+
+  // Get the current user from localStorage
+  const currentUser = JSON.parse(localStorage.getItem("user")) || {};
 
   useEffect(() => {
     const fetchPost = async () => {
@@ -40,6 +42,7 @@ const PostDetail = () => {
       prevComments.filter((comment) => comment._id !== deletedCommentId)
     );
   };
+
   if (loading)
     return (
       <div className="flex justify-center items-center h-64">
@@ -97,10 +100,15 @@ const PostDetail = () => {
                 className="bg-gray-50 p-4 rounded-lg shadow"
               >
                 <p className="text-gray-700">{comment.content}</p>
-                <DeleteComment
-                  commentId={comment._id}
-                  onDelete={handleDeleteComment}
-                />
+
+                {/* Show DeleteComment button if the logged-in user is the comment author */}
+                {loggedIn && currentUser.username === comment.author?.username && (
+                  <DeleteComment
+                    commentId={comment._id}
+                    onDelete={handleDeleteComment}
+                  />
+                )}
+
                 <span className="text-sm text-gray-500">
                   — @{comment.author?.username || "Anonymous"}
                 </span>
