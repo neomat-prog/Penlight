@@ -6,6 +6,7 @@ const authMiddleware = require("./middleware/auth");
 const usersRouter = require("./routes/user");
 const Post = require("./models/post");
 const User = require("./models/user");
+const Comment = require("./models/comment");
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -74,7 +75,9 @@ app.patch("/posts/:id", authMiddleware, async (req, res) => {
     }
 
     if (post.author.toString() !== userId) {
-      return res.status(403).json({ message: "Unauthorized to edit this post" });
+      return res
+        .status(403)
+        .json({ message: "Unauthorized to edit this post" });
     }
 
     const updatedPost = await Post.findByIdAndUpdate(postId, updates, {
@@ -89,7 +92,6 @@ app.patch("/posts/:id", authMiddleware, async (req, res) => {
 });
 
 // Delete Endpoint
-
 
 app.delete("/posts/:id", authMiddleware, async (req, res) => {
   try {
@@ -132,10 +134,12 @@ app.get("/posts/:id", async (req, res) => {
       return res.status(400).json({ message: "Invalid post ID" });
     }
 
-    const post = await Post.findById(postId).populate(
-      "author",
-      "username name"
-    );
+    const post = await Post.findById(postId)
+      .populate("author", "username name")
+      .populate({
+        path: "comments",
+        populate: { path: "author", select: "username" }
+      });
 
     if (!post) {
       return res.status(404).json({ message: "Post not found" });
@@ -145,6 +149,62 @@ app.get("/posts/:id", async (req, res) => {
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Failed to retrieve post" });
+  }
+});
+
+// Add comment to post
+
+app.post("/add-comment/:id", authMiddleware, async (req, res) => {
+  const { content } = req.body;
+  const postId = req.params.id;
+
+  if (!mongoose.Types.ObjectId.isValid(postId)) {
+    return res.status(400).json({ message: "Invalid post ID" });
+  }
+
+  try {
+    // Find the authenticated user
+    const user = await User.findById(req.userId);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    // Find the post by ID
+    const post = await Post.findById(postId);
+    if (!post) {
+      return res.status(404).json({ message: "Post not found" });
+    }
+
+    // Create a new comment
+    const newComment = new Comment({
+      content,
+      author: user._id,
+      post: post._id,
+      createdAt: new Date(),
+    });
+
+    // Save the comment
+    const savedComment = await newComment.save();
+
+    // Add the comment to the post
+    post.comments.push(savedComment._id);
+    await post.save();
+
+    // Add the comment to the user's comments list
+    user.comments.push(savedComment._id);
+    await user.save();
+
+    // Populate the comment details before sending response
+    await savedComment.populate("author", "username");
+
+    res.status(201).json({
+      message: "Comment added successfully",
+      comment: savedComment,
+      post,
+    });
+  } catch (error) {
+    console.error("Error adding comment:", error);
+    res.status(500).json({ message: "Internal Server Error" });
   }
 });
 

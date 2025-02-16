@@ -10,6 +10,12 @@ const postSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+  comments: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Comment",
+    },
+  ],
   author: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "User", // Reference to User model
