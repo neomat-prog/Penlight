@@ -60,6 +60,37 @@ app.post("/create-post", authMiddleware, async (req, res) => {
   }
 });
 
+// Editing Endpoint
+
+app.patch("/posts/:id", authMiddleware, async (req, res) => {
+  try {
+    const postId = req.params.id;
+    const updates = req.body;
+    const userId = req.userId;
+
+    const post = await Post.findById(postId);
+    if (!post) {
+      return res.status(404).json({ message: "Post not found" });
+    }
+
+    if (post.author.toString() !== userId) {
+      return res.status(403).json({ message: "Unauthorized to edit this post" });
+    }
+
+    const updatedPost = await Post.findByIdAndUpdate(postId, updates, {
+      new: true,
+      runValidators: true,
+    }).populate("author", "username");
+
+    res.json(updatedPost);
+  } catch (error) {
+    res.status(500).json({ message: "Error updating post", error });
+  }
+});
+
+// Delete Endpoint
+
+
 app.delete("/posts/:id", authMiddleware, async (req, res) => {
   try {
     const postId = req.params.id;

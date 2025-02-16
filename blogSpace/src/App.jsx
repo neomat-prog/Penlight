@@ -26,7 +26,24 @@ const App = () => {
       setLoggedIn(true);
       setUsername(userData.username);
     }
-    setLoading(false); // Ensure we stop showing the loading state after the check
+    setLoading(false);
+  }, []);
+
+  const fetchPosts = async () => {
+    setLoading(true);
+    try {
+      const response = await axios.get("http://localhost:3001/posts");
+      setPosts(response.data);
+    } catch (error) {
+      console.error("Error fetching posts:", error);
+      setError(error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchPosts();
   }, []);
 
   const handleLogOut = () => {
@@ -40,25 +57,12 @@ const App = () => {
     setPosts((prevPosts) => prevPosts.filter((post) => post._id !== postId));
   };
 
-  useEffect(() => {
-    const fetchPosts = async () => {
-      setLoading(true);
-      try {
-        const response = await axios.get("http://localhost:3001/posts");
-        setPosts(response.data);
-      } catch (error) {
-        console.error("Error fetching posts:", error);
-        setError(error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchPosts();
-  }, []);
-
   const handleNewPost = (newPost) => {
     setPosts((prevPosts) => [newPost, ...prevPosts]);
+  };
+
+  const handleEdit = () => {
+    fetchPosts(); // Now this works because it's in scope
   };
 
   if (loading) {
@@ -144,6 +148,7 @@ const App = () => {
                       error={error}
                       onDelete={handleDeletePost}
                       loggedIn={loggedIn}
+                      onEdit={handleEdit}
                     />
                   </section>
                 </>

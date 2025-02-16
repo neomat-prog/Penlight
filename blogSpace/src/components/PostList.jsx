@@ -1,14 +1,48 @@
-// PostList.jsx
 import PropTypes from "prop-types";
 import { Link } from "react-router-dom";
+import { motion } from "framer-motion";
 import PostDelete from "./PostDelete";
+import PostEdit from "./PostEdit";
 
-const PostList = ({ posts, loading, error, onDelete, loggedIn }) => {
+const PostList = ({ posts, loading, error, onDelete, loggedIn, onEdit }) => {
   const currentUser = JSON.parse(localStorage.getItem("user")) || {};
 
   if (loading) {
     return (
-      <p className="text-center py-12 text-gray-500 text-xl">Loading...</p>
+      <div className="flex justify-center py-12">
+        <motion.div
+          className="flex space-x-2"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ repeat: Infinity, duration: 1.5 }}
+        >
+          <motion.span
+            className="w-3 h-3 bg-blue-500 rounded-full"
+            animate={{ y: [0, -10, 0] }}
+            transition={{ repeat: Infinity, duration: 0.6, ease: "easeInOut" }}
+          />
+          <motion.span
+            className="w-3 h-3 bg-blue-500 rounded-full"
+            animate={{ y: [0, -10, 0] }}
+            transition={{
+              repeat: Infinity,
+              duration: 0.6,
+              ease: "easeInOut",
+              delay: 0.2,
+            }}
+          />
+          <motion.span
+            className="w-3 h-3 bg-blue-500 rounded-full"
+            animate={{ y: [0, -10, 0] }}
+            transition={{
+              repeat: Infinity,
+              duration: 0.6,
+              ease: "easeInOut",
+              delay: 0.4,
+            }}
+          />
+        </motion.div>
+      </div>
     );
   }
 
@@ -47,7 +81,15 @@ const PostList = ({ posts, loading, error, onDelete, loggedIn }) => {
                 Posted by @{post.author?.username || "Anonymous"}
               </span>
               {loggedIn && currentUser.username === post.author?.username && (
-                <PostDelete onDelete={onDelete} postId={post._id} />
+                <div className="flex gap-2">
+                  <PostEdit
+                    postId={post._id}
+                    initialTitle={post.title}
+                    initialContent={post.content}
+                    onEdit={onEdit}
+                  />
+                  <PostDelete onDelete={onDelete} postId={post._id} />
+                </div>
               )}
             </div>
           </article>
@@ -67,6 +109,7 @@ PostList.propTypes = {
   error: PropTypes.object,
   onDelete: PropTypes.func.isRequired,
   loggedIn: PropTypes.bool.isRequired,
+  onEdit: PropTypes.func.isRequired,
 };
 
 export default PostList;
