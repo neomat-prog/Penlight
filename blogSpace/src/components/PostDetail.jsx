@@ -2,8 +2,14 @@ import { useParams } from "react-router-dom";
 import axios from "axios";
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
+import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Skeleton } from "@/components/ui/skeleton";
 import PostComment from "./functionality/PostComment";
 import DeleteComment from "./functionality/DeleteComment";
+import { Alert } from "@/components/ui/alert";
+import { Trash2 } from "lucide-react";
 
 const PostDetail = ({ loggedIn }) => {
   const { postId } = useParams();
@@ -45,80 +51,124 @@ const PostDetail = ({ loggedIn }) => {
 
   if (loading)
     return (
-      <div className="flex justify-center items-center h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-4 border-indigo-600 border-t-transparent" />
+      <div className="max-w-3xl mx-auto px-4 space-y-8">
+        <Skeleton className="h-12 w-3/4 mb-6" />
+        <div className="space-y-4">
+          {[...Array(4)].map((_, i) => (
+            <Skeleton key={i} className="h-4 w-full" />
+          ))}
+        </div>
+        <div className="mt-8 space-y-6">
+          <Skeleton className="h-8 w-48" />
+          {[...Array(3)].map((_, i) => (
+            <Skeleton key={i} className="h-20 w-full rounded-lg" />
+          ))}
+        </div>
       </div>
     );
 
   if (error)
     return (
-      <div className="p-6 bg-red-50 rounded-lg text-red-700 border border-red-200">
+      <Alert variant="destructive" className="max-w-3xl mx-auto">
         ⚠️ Error loading post: {error}
-      </div>
+      </Alert>
     );
 
   if (!post)
     return (
-      <div className="p-6 bg-yellow-50 rounded-lg text-yellow-700 border border-yellow-200">
+      <Alert variant="default" className="max-w-3xl mx-auto">
         Post not found
-      </div>
+      </Alert>
     );
 
   return (
     <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      className="max-w-3xl mx-auto px-4"
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="max-w-3xl mx-auto px-4 py-8"
     >
-      <article className="bg-white rounded-2xl shadow-xl p-8 border border-gray-100">
-        <h1 className="text-4xl font-bold text-gray-900 mb-6">{post.title}</h1>
-        <div className="prose-lg text-gray-600 mb-8">
+      <Card className="p-8 rounded-xl shadow-sm hover:shadow-md transition-shadow">
+        <h1 className="text-5xl font-extrabold bg-gradient-to-r from-indigo-600 to-blue-500 bg-clip-text text-transparent mb-8">
+          {post.title}
+        </h1>
+        
+        <div className="prose prose-lg max-w-none text-gray-600 mb-12 font-serif">
           {post.content.split("\n").map((line, i) => (
-            <p key={i} className="mb-4">
+            <p key={i} className="mb-6 leading-7">
               {line}
             </p>
           ))}
         </div>
-        <div className="border-t pt-6">
-          <p className="text-sm text-gray-500">
-            Posted by @{post.author?.username || "Anonymous"}
-          </p>
+
+        <div className="flex items-center gap-3 border-t pt-6">
+          <Avatar className="h-10 w-10">
+            <AvatarFallback className="bg-indigo-100 text-indigo-600 font-medium">
+              {post.author?.username?.charAt(0).toUpperCase() || "A"}
+            </AvatarFallback>
+          </Avatar>
+          <div>
+            <p className="text-sm font-medium text-gray-900">
+              @{post.author?.username || "Anonymous"}
+            </p>
+            <p className="text-sm text-gray-500">Posted on {new Date(post.createdAt).toLocaleDateString()}</p>
+          </div>
         </div>
-      </article>
+      </Card>
 
-      {/* Comment Form */}
-     { loggedIn && <PostComment postId={postId} onNewComment={handleNewComment} />}
+      {/* Comment Section */}
+      <div className="mt-12 space-y-8">
+        {loggedIn && (
+          <Card className="p-6 rounded-xl">
+            <PostComment postId={postId} onNewComment={handleNewComment} />
+          </Card>
+        )}
 
-      {/* Render Comments */}
-      <div className="mt-8">
-        <h2 className="text-2xl font-semibold mb-4">Comments</h2>
+        <h2 className="text-3xl font-bold text-gray-900">Responses ({comments.length})</h2>
+        
         {comments.length > 0 ? (
-          <ul className="space-y-4">
+          <div className="space-y-6">
             {comments.map((comment, index) => (
-              <li
+              <Card 
                 key={comment._id || `comment-${index}`}
-                className="bg-gray-50 p-4 rounded-lg shadow"
+                className="p-6 rounded-xl group hover:bg-indigo-50/50 transition-colors"
               >
-                <p className="text-gray-700">{comment.content}</p>
-
-                {/* Show DeleteComment button if the logged-in user is the comment author */}
-                {loggedIn && currentUser.username === comment.author?.username && (
-                  <DeleteComment
-                    commentId={comment._id}
-                    onDelete={handleDeleteComment}
-                  />
-                )}
-
-                <span className="text-sm text-gray-500">
-                  — @{comment.author?.username || "Anonymous"}
-                </span>
-              </li>
+                <div className="flex gap-4">
+                  <Avatar className="h-9 w-9">
+                    <AvatarFallback className="bg-blue-100 text-blue-600">
+                      {comment.author?.username?.charAt(0).toUpperCase() || "U"}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div className="flex-1">
+                    <div className="flex items-center gap-3 mb-2">
+                      <span className="font-medium text-gray-900">
+                        @{comment.author?.username || "Anonymous"}
+                      </span>
+                      <span className="text-sm text-gray-500">
+                        {new Date(comment.createdAt).toLocaleDateString()}
+                      </span>
+                    </div>
+                    <p className="text-gray-600 leading-relaxed">{comment.content}</p>
+                  </div>
+                  
+                  {loggedIn && currentUser.username === comment.author?.username && (
+                    <DeleteComment commentId={comment._id} onDelete={handleDeleteComment}>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="opacity-0 group-hover:opacity-100 text-gray-400 hover:text-red-600"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </DeleteComment>
+                  )}
+                </div>
+              </Card>
             ))}
-          </ul>
+          </div>
         ) : (
-          <p className="text-gray-500">
-            No comments yet. Be the first to comment!
-          </p>
+          <div className="py-12 text-center">
+            <p className="text-gray-500 text-lg">No comments yet. Start the conversation! 💬</p>
+          </div>
         )}
       </div>
     </motion.div>

@@ -4,8 +4,19 @@ import {
   Routes,
   Route,
   useNavigate,
-} from "react-router-dom"; // Import useNavigate
-import "./App.css";
+} from "react-router-dom";
+import {
+  Card,
+  CardHeader,
+  CardContent,
+  CardFooter,
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Separator } from "@/components/ui/separator";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import axios from "axios";
 import PostList from "./components/PostList";
 import LogInForm from "./components/auth/LogInForm";
@@ -13,6 +24,7 @@ import RegisterForm from "./components/functionality/RegisterForm";
 import LogOut from "./components/auth/LogOut";
 import CreatePost from "./components/functionality/CreatePost";
 import PostDetail from "./components/PostDetail";
+import Navbar from "./components/Navbar";
 
 const App = () => {
   const [posts, setPosts] = useState([]);
@@ -77,60 +89,84 @@ const App = () => {
     );
   }
 
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="flex items-center space-x-4">
+          <Skeleton className="h-12 w-12 rounded-full" />
+          <div className="space-y-2">
+            <Skeleton className="h-4 w-[250px]" />
+            <Skeleton className="h-4 w-[200px]" />
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <Router>
-      <div className="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100 font-sans">
-        <NavBar
+      <div className="min-h-screen bg-background font-sans antialiased">
+        <Navbar
           loggedIn={loggedIn}
           username={username}
           onLogOut={handleLogOut}
           onNewPost={handleNewPost}
         />
-        <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        
+        <main className="container max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <Routes>
             <Route
               path="/"
               element={
-                <>
+                <div className="space-y-12">
                   {!loggedIn && (
-                    <div className="max-w-md mx-auto mb-12 bg-white rounded-2xl p-8 shadow-lg transition-all hover:shadow-xl">
-                      <div className="text-center mb-6">
-                        <h2 className="text-2xl font-bold text-gray-900 mb-2">
+                    <Card className="max-w-md mx-auto bg-background hover:shadow-lg transition-shadow">
+                      <CardHeader className="space-y-1">
+                        <h2 className="text-2xl font-bold tracking-tight text-center">
                           {showRegister ? "Join BlogWave" : "Welcome Back"}
                         </h2>
-                        <p className="text-gray-600">
+                        <p className="text-muted-foreground text-center">
                           {showRegister
                             ? "Create your account to start sharing"
                             : "Sign in to continue your journey"}
                         </p>
-                      </div>
-                      {showRegister ? (
-                        <RegisterForm
-                          setLoggedIn={setLoggedIn}
-                          setUsername={setUsername}
-                        />
-                      ) : (
-                        <LogInForm
-                          setLoggedIn={setLoggedIn}
-                          setUsername={setUsername}
-                        />
-                      )}
-                      <button
-                        className="mt-6 w-full text-center text-sm text-indigo-600 hover:text-indigo-800 transition-colors font-medium"
-                        onClick={() => setShowRegister(!showRegister)}
-                      >
-                        {showRegister
-                          ? "Already have an account? Sign in"
-                          : "Don't have an account? Register now"}
-                      </button>
-                    </div>
+                      </CardHeader>
+                      <CardContent className="grid gap-4">
+                        {showRegister ? (
+                          <RegisterForm
+                            setLoggedIn={setLoggedIn}
+                            setUsername={setUsername}
+                          />
+                        ) : (
+                          <LogInForm
+                            setLoggedIn={setLoggedIn}
+                            setUsername={setUsername}
+                          />
+                        )}
+                      </CardContent>
+                      <CardFooter className="flex flex-col">
+                        <Separator className="mb-4" />
+                        <Button
+                          variant="link"
+                          className="text-primary font-medium"
+                          onClick={() => setShowRegister(!showRegister)}
+                        >
+                          {showRegister
+                            ? "Existing user? Sign in"
+                            : "New user? Create account"}
+                        </Button>
+                      </CardFooter>
+                    </Card>
                   )}
 
-                  <section className="mb-16">
-                    <h2 className="text-3xl font-bold text-gray-900 mb-8">
-                      Latest Stories
-                      <div className="w-16 h-1 bg-indigo-600 mt-2 rounded-full" />
-                    </h2>
+                  <section className="space-y-8">
+                    <div className="space-y-2">
+                      <h2 className="text-3xl font-bold tracking-tight">
+                        Latest Stories
+                      </h2>
+                      <Separator className="w-24 h-1 bg-primary" />
+                    </div>
                     <PostList
                       posts={posts}
                       loading={loading}
@@ -140,9 +176,10 @@ const App = () => {
                       onEdit={handleEdit}
                     />
                   </section>
-                </>
+                </div>
               }
             />
+            
             <Route
               path="/posts/:postId"
               element={<PostDetail loggedIn={loggedIn} />}
@@ -150,10 +187,12 @@ const App = () => {
           </Routes>
         </main>
 
-        <footer className="border-t border-gray-200 bg-white mt-24">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-            <p className="text-center text-gray-600 text-sm">
-              {`© ${new Date().getFullYear()} BlogWave. Crafted with ❤️ for great stories`}
+        <footer className="border-t bg-muted/50 mt-24">
+          <div className="container max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <p className="text-center text-sm text-muted-foreground">
+              {`© ${new Date().getFullYear()} BlogWave. Crafted with `}
+              <span className="text-primary">❤️</span>
+              {` for great stories`}
             </p>
           </div>
         </footer>
@@ -162,36 +201,6 @@ const App = () => {
   );
 };
 
-// NavBar Component
-const NavBar = ({ loggedIn, username, onLogOut, onNewPost }) => {
-  const navigate = useNavigate(); // Use the useNavigate hook
 
-  return (
-    <nav className="sticky top-0 z-50 bg-white/80 backdrop-blur-sm border-b border-gray-200 shadow-sm">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16">
-          {/* Make the BlogWave title a button that redirects to the home page */}
-          <button
-            onClick={() => navigate("/")} // Navigate to the home page
-            className="text-3xl font-bold bg-gradient-to-r from-indigo-600 to-blue-500 bg-clip-text text-transparent hover:from-blue-600 hover:to-indigo-700 transition-all"
-          >
-            BlogWave
-          </button>
-          <div className="flex items-center gap-4">
-            {loggedIn && <CreatePost onNewPost={onNewPost} />}
-            {loggedIn && (
-              <div className="flex items-center gap-3">
-                <span className="text-sm font-medium text-gray-700">
-                  @{username}
-                </span>
-                <LogOut onLogOut={onLogOut} />
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
-    </nav>
-  );
-};
 
 export default App;
