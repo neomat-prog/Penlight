@@ -13,6 +13,7 @@ import RegisterForm from "./components/functionality/RegisterForm";
 import LogOut from "./components/auth/LogOut";
 import CreatePost from "./components/functionality/CreatePost";
 import PostDetail from "./components/PostDetail";
+import Navbar from "./components/Navbar";
 
 const App = () => {
   const [posts, setPosts] = useState([]);
@@ -80,7 +81,7 @@ const App = () => {
   return (
     <Router>
       <div className="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100 font-sans">
-        <NavBar
+        <Navbar
           loggedIn={loggedIn}
           username={username}
           onLogOut={handleLogOut}
@@ -152,7 +153,7 @@ const App = () => {
 
         <footer className="border-t border-gray-200 bg-white mt-24">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-            <p className="text-center text-gray-600 text-sm">
+            <p className="text-center text-blue-600 text-sm">
               {`© ${new Date().getFullYear()} BlogWave. Crafted with ❤️ for great stories`}
             </p>
           </div>
