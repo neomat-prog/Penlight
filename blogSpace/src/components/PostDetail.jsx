@@ -87,7 +87,7 @@ const PostDetail = ({ loggedIn }) => {
       </article>
 
       {/* Comment Form */}
-      <PostComment postId={postId} onNewComment={handleNewComment} />
+     { loggedIn && <PostComment postId={postId} onNewComment={handleNewComment} />}
 
       {/* Render Comments */}
       <div className="mt-8">
