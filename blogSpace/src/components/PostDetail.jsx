@@ -2,8 +2,8 @@ import { useParams } from "react-router-dom";
 import axios from "axios";
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import PostComment from "./PostComment";
-import DeleteComment from "./DeleteComment";
+import PostComment from "./functionality/PostComment";
+import DeleteComment from "./functionality/DeleteComment";
 
 const PostDetail = ({ loggedIn }) => {
   const { postId } = useParams();

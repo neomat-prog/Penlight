@@ -1,8 +1,8 @@
 import PropTypes from "prop-types";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import PostDelete from "./PostDelete";
-import PostEdit from "./PostEdit";
+import PostDelete from "./functionality/PostDelete";
+import PostEdit from "./functionality/PostEdit";
 
 const PostList = ({ posts, loading, error, onDelete, loggedIn, onEdit }) => {
   const currentUser = JSON.parse(localStorage.getItem("user")) || {};

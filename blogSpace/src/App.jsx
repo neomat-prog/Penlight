@@ -8,10 +8,10 @@ import {
 import "./App.css";
 import axios from "axios";
 import PostList from "./components/PostList";
-import LogInForm from "./components/LogInForm";
-import RegisterForm from "./components/RegisterForm";
-import LogOut from "./components/LogOut";
-import CreatePost from "./components/CreatePost";
+import LogInForm from "./components/auth/LogInForm";
+import RegisterForm from "./components/functionality/RegisterForm";
+import LogOut from "./components/auth/LogOut";
+import CreatePost from "./components/functionality/CreatePost";
 import PostDetail from "./components/PostDetail";
 
 const App = () => {
