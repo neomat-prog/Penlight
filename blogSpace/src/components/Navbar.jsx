@@ -54,7 +54,7 @@ const Navbar = ({ loggedIn, username, onLogOut, onNewPost }) => {
             <span className="text-3xl font-bold bg-gradient-to-r from-indigo-600 to-blue-500 bg-clip-text text-transparent hover:from-blue-600 hover:to-indigo-700 transition-all duration-300">
               BlogWave
             </span>
-            <div className="h-2 w-2 bg-indigo-500 rounded-full group-hover:bg-blue-500 transition-colors duration-300" />
+            
           </button>
 
           {loggedIn && (
