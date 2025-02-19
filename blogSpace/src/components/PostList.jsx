@@ -9,7 +9,7 @@ const PostList = ({ posts, loading, error, onDelete, loggedIn, onEdit }) => {
 
   if (loading) {
     return (
-      <div className="flex justify-center py-12">
+      <div className="flex justify-center py-12 ">
         <motion.div
           className="flex space-x-2"
           initial={{ opacity: 0 }}
@@ -55,43 +55,47 @@ const PostList = ({ posts, loading, error, onDelete, loggedIn, onEdit }) => {
   }
 
   return (
-    <div className="space-y-12">
+    <div className="space-y-8 max-w-3xl mx-auto">
       {posts.length > 0 ? (
         posts.map((post) => (
           <article
-            key={post._id}
-            className="bg-white rounded-xl shadow-xl p-8 border border-gray-100 hover:shadow-2xl transition-shadow"
-          >
-            <div className="mb-6">
-              <Link to={`/posts/${post._id}`}>
-                <h3 className="text-3xl font-semibold text-gray-800 hover:text-blue-600 transition-colors">
+  key={post._id}
+  className="bg-white p-6 hover:bg-gray-100 transition-colors duration-200 shadow-sm hover:shadow-md hover:shadow-gray-300"
+>
+
+            <div className="mb-4">
+              <div className="flex items-center text-sm text-gray-500 space-x-2 mb-3">
+                <span className="font-medium">
+                  {post.author?.name || "Anonymous"}
+                </span>
+                <span>·</span>
+                <span>{post.date || "1 day ago"}</span>
+                <span>·</span>
+                <span>{post.readTime || "4 min read"}</span>
+              </div>
+
+              <Link to={`/posts/${post._id}`} className="block">
+                <h3 className="text-2xl font-bold text-gray-900 mb-3 font-serif">
                   {post.title}
                 </h3>
-                <p className="text-lg text-gray-600 mt-4">{post.content}</p>
+                <p className="text-gray-700 leading-relaxed font-serif line-clamp-3">
+                  {post.content}
+                </p>
               </Link>
             </div>
-            <div className="flex justify-between items-center">
+
+            <div className="mt-4">
               <Link
                 to={`/posts/${post._id}`}
-                className="text-blue-600 hover:text-blue-700 font-medium"
+                className="text-gray-500 text-sm hover:text-gray-700 flex items-center"
               >
-                Read more
+                <span className="mr-1">Continue reading</span>
+                <span className="text-gray-400 mx-1">-</span>
+                <span>{post.readTime || "4 min read"}</span>
               </Link>
-              <span className="text-sm text-gray-500">
-                Posted by @{post.author?.username || "Anonymous"}
-              </span>
-              {loggedIn && currentUser.username === post.author?.username && (
-                <div className="flex gap-2">
-                  <PostEdit
-                    postId={post._id}
-                    initialTitle={post.title}
-                    initialContent={post.content}
-                    onEdit={onEdit}
-                  />
-                  <PostDelete onDelete={onDelete} postId={post._id} />
-                </div>
-              )}
             </div>
+
+            
           </article>
         ))
       ) : (

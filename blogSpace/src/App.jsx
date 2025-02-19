@@ -25,6 +25,8 @@ import LogOut from "./components/auth/LogOut";
 import CreatePost from "./components/functionality/CreatePost";
 import PostDetail from "./components/PostDetail";
 import Navbar from "./components/Navbar";
+import AuthPage from "./components/auth/AuthPage";
+import SearchResults from "./components/ui/SearchResults";
 
 const App = () => {
   const [posts, setPosts] = useState([]);
@@ -89,7 +91,6 @@ const App = () => {
     );
   }
 
-
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -112,54 +113,17 @@ const App = () => {
           username={username}
           onLogOut={handleLogOut}
           onNewPost={handleNewPost}
+          setLoading={setLoading} // Pass setLoading
+          setPosts={setPosts} // Pass setPosts
+          setError={setError} // Pass setError
         />
-        
+
         <main className="container max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <Routes>
             <Route
               path="/"
               element={
                 <div className="space-y-12">
-                  {!loggedIn && (
-                    <Card className="max-w-md mx-auto bg-background hover:shadow-lg transition-shadow">
-                      <CardHeader className="space-y-1">
-                        <h2 className="text-2xl font-bold tracking-tight text-center">
-                          {showRegister ? "Join BlogWave" : "Welcome Back"}
-                        </h2>
-                        <p className="text-muted-foreground text-center">
-                          {showRegister
-                            ? "Create your account to start sharing"
-                            : "Sign in to continue your journey"}
-                        </p>
-                      </CardHeader>
-                      <CardContent className="grid gap-4">
-                        {showRegister ? (
-                          <RegisterForm
-                            setLoggedIn={setLoggedIn}
-                            setUsername={setUsername}
-                          />
-                        ) : (
-                          <LogInForm
-                            setLoggedIn={setLoggedIn}
-                            setUsername={setUsername}
-                          />
-                        )}
-                      </CardContent>
-                      <CardFooter className="flex flex-col">
-                        <Separator className="mb-4" />
-                        <Button
-                          variant="link"
-                          className="text-primary font-medium"
-                          onClick={() => setShowRegister(!showRegister)}
-                        >
-                          {showRegister
-                            ? "Existing user? Sign in"
-                            : "New user? Create account"}
-                        </Button>
-                      </CardFooter>
-                    </Card>
-                  )}
-
                   <section className="space-y-8">
                     <div className="space-y-2">
                       <h2 className="text-3xl font-bold tracking-tight">
@@ -179,19 +143,28 @@ const App = () => {
                 </div>
               }
             />
-            
+            <Route
+              path="/login"
+              element={
+                <AuthPage
+                  loggedIn={loggedIn}
+                  setLoggedIn={setLoggedIn}
+                  setUsername={setUsername}
+                />
+              }
+            />
             <Route
               path="/posts/:postId"
               element={<PostDetail loggedIn={loggedIn} />}
             />
+            <Route path="/search" element={<SearchResults />} />
           </Routes>
         </main>
 
-        <footer className="border-t bg-muted/50 mt-24">
+        <footer className="border border-gray-200 bg-muted/50 mt-24">
           <div className="container max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-            <p className="text-center text-sm text-muted-foreground">
-              {`© ${new Date().getFullYear()} BlogWave. Crafted with `}
-              <span className="text-primary">❤️</span>
+            <p className="text-center text-gray-500 text-sm text-muted-foreground">
+              {`© ${new Date().getFullYear()} BlogWave.  `}
               {` for great stories`}
             </p>
           </div>
@@ -200,7 +173,5 @@ const App = () => {
     </Router>
   );
 };
-
-
 
 export default App;
