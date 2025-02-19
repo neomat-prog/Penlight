@@ -26,6 +26,7 @@ import CreatePost from "./components/functionality/CreatePost";
 import PostDetail from "./components/PostDetail";
 import Navbar from "./components/Navbar";
 import AuthPage from "./components/auth/AuthPage";
+import SearchResults from "./components/ui/SearchResults";
 
 const App = () => {
   const [posts, setPosts] = useState([]);
@@ -112,6 +113,9 @@ const App = () => {
           username={username}
           onLogOut={handleLogOut}
           onNewPost={handleNewPost}
+          setLoading={setLoading} // Pass setLoading
+          setPosts={setPosts} // Pass setPosts
+          setError={setError} // Pass setError
         />
 
         <main className="container max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -153,6 +157,7 @@ const App = () => {
               path="/posts/:postId"
               element={<PostDetail loggedIn={loggedIn} />}
             />
+            <Route path="/search" element={<SearchResults />} />
           </Routes>
         </main>
 
@@ -160,7 +165,6 @@ const App = () => {
           <div className="container max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
             <p className="text-center text-gray-500 text-sm text-muted-foreground">
               {`© ${new Date().getFullYear()} BlogWave.  `}
-
               {` for great stories`}
             </p>
           </div>

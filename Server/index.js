@@ -117,8 +117,39 @@ app.delete("/posts/:id", authMiddleware, async (req, res) => {
 });
 
 app.get("/posts", async (req, res) => {
+  const { q } = req.query; // Get the search query from the request
+
   try {
-    const posts = await Post.find().populate("author", "username name");
+    let posts;
+    if (q) {
+      const escapedQuery = q.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+      posts = await Post.find({ title: { $regex: q, $options: "i" } }).populate(
+        "author",
+        "username name"
+      );
+    } else {
+      posts = await Post.find().populate("author", "username name");
+    }
+    res.json(posts);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Failed to retrieve posts" });
+  }
+});
+
+app.get("/search", async (req, res) => {
+  const { q } = req.query;
+
+  try {
+    let posts;
+    if (q) {
+      posts = await Post.find({ title: { $regex: q, $options: "i" } }).populate(
+        "author",
+        "username name"
+      );
+    } else {
+      posts = await Post.find().populate("author", "username name");
+    }
     res.json(posts);
   } catch (error) {
     console.error(error);
@@ -169,7 +200,9 @@ app.delete("/comments/:id", authMiddleware, async (req, res) => {
 
     // Check if the authenticated user is the author of the comment
     if (comment.author.toString() !== req.userId) {
-      return res.status(403).json({ message: "Unauthorized to delete this comment" });
+      return res
+        .status(403)
+        .json({ message: "Unauthorized to delete this comment" });
     }
 
     // Delete the comment
