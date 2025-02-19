@@ -1,12 +1,15 @@
 import PropTypes from "prop-types";
 import { useState } from "react";
 import axios from "axios";
+import { useNavigate } from 'react-router-dom';
+
+
 
 const LogInForm = ({ setLoggedIn, setUsername }) => {
   const [username, setUsernameInput] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
-
+  const navigate = useNavigate();
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
@@ -27,6 +30,7 @@ const LogInForm = ({ setLoggedIn, setUsername }) => {
 
       setLoggedIn(true);
       setUsername(response.data.username);
+      navigate('/');
     } catch (err) {
       setError(err.response?.data?.message || "Invalid username or password.");
       console.error("Login error:", err.response?.data);
