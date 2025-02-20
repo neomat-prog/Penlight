@@ -85,91 +85,131 @@ const PostDetail = ({ loggedIn }) => {
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="max-w-3xl mx-auto px-4 py-8"
+      className="max-w-2xl mx-auto px-4 py-8"
     >
-      <Card className="p-8 rounded-xl shadow-sm hover:shadow-md transition-shadow">
-        <h1 className="text-5xl font-extrabold bg-gradient-to-r from-indigo-600 to-blue-500 bg-clip-text text-transparent mb-8">
+      {/* Post Content */}
+      <article className="mb-12">
+        <h1 className="font-serif text-4xl md:text-5xl font-bold tracking-tight mb-10 text-gray-900">
           {post.title}
         </h1>
-        
-        <div className="prose prose-lg max-w-none text-gray-600 mb-12 font-serif">
+
+        <div className="flex items-center ">
+          {post.image && (
+            <div className="relative w-screen max-w-none -mx-4 md:-mx-8 lg:-mx-16 my-12">
+              {/* Image with full width */}
+              <img
+                src={post.image}
+                alt={post.title}
+                className="w-full h-auto object-cover"
+                loading="lazy"
+              />
+            </div>
+          )}
+        </div>
+
+        <div className="font-serif text-xl leading-8 text-gray-800 space-y-6">
           {post.content.split("\n").map((line, i) => (
-            <p key={i} className="mb-6 leading-7">
+            <p key={i} className="mb-8">
               {line}
             </p>
           ))}
         </div>
 
-        <div className="flex items-center gap-3 border-t pt-6">
-          <Avatar className="h-10 w-10">
-            <AvatarFallback className="bg-indigo-100 text-indigo-600 font-medium">
+        {/* Author Section */}
+        <div className="flex items-center gap-3 mt-16 pt-8 border-t">
+          <Avatar className="h-12 w-12">
+            <AvatarFallback className="bg-gray-100 text-gray-600 font-medium">
               {post.author?.username?.charAt(0).toUpperCase() || "A"}
             </AvatarFallback>
           </Avatar>
           <div>
             <p className="text-sm font-medium text-gray-900">
-              @{post.author?.username || "Anonymous"}
+              {post.author?.username || "Anonymous"}
             </p>
-            <p className="text-sm text-gray-500">Posted on {new Date(post.createdAt).toLocaleDateString()}</p>
+            <p className="text-sm text-gray-500">
+              {new Date(post.createdAt).toLocaleDateString("en-US", {
+                month: "long",
+                day: "numeric",
+                year: "numeric",
+              })}
+            </p>
           </div>
+          <Button
+            variant="outline"
+            className="ml-4 text-gray-600 hover:text-gray-900 hover:bg-gray-100 h-8 px-3"
+          >
+            Follow
+          </Button>
         </div>
-      </Card>
+      </article>
 
       {/* Comment Section */}
-      <div className="mt-12 space-y-8">
-        {loggedIn && (
-          <Card className="p-6 rounded-xl">
-            <PostComment postId={postId} onNewComment={handleNewComment} />
-          </Card>
-        )}
+      <div className="mt-16">
+        <div className="border-t pt-12">
+          <div className="flex items-center justify-between mb-8">
+            <h2 className="text-xl font-bold text-gray-900">
+              Responses ({comments.length})
+            </h2>
+            {loggedIn && (
+              <PostComment postId={postId} onNewComment={handleNewComment} />
+            )}
+          </div>
 
-        <h2 className="text-3xl font-bold text-gray-900">Responses ({comments.length})</h2>
-        
-        {comments.length > 0 ? (
-          <div className="space-y-6">
-            {comments.map((comment, index) => (
-              <Card 
-                key={comment._id || `comment-${index}`}
-                className="p-6 rounded-xl group hover:bg-indigo-50/50 transition-colors"
-              >
-                <div className="flex gap-4">
-                  <Avatar className="h-9 w-9">
-                    <AvatarFallback className="bg-blue-100 text-blue-600">
-                      {comment.author?.username?.charAt(0).toUpperCase() || "U"}
-                    </AvatarFallback>
-                  </Avatar>
-                  <div className="flex-1">
-                    <div className="flex items-center gap-3 mb-2">
-                      <span className="font-medium text-gray-900">
-                        @{comment.author?.username || "Anonymous"}
-                      </span>
-                      <span className="text-sm text-gray-500">
-                        {new Date(comment.createdAt).toLocaleDateString()}
-                      </span>
+          {comments.length > 0 ? (
+            <div className="space-y-8">
+              {comments.map((comment, index) => (
+                <div
+                  key={comment._id || `comment-${index}`}
+                  className="pb-8 border-b last:border-b-0 group"
+                >
+                  <div className="flex gap-4">
+                    <Avatar className="h-8 w-8">
+                      <AvatarFallback className="bg-gray-100 text-gray-600 text-sm">
+                        {comment.author?.username?.charAt(0).toUpperCase() ||
+                          "U"}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div className="flex-1">
+                      <div className="flex items-center gap-3 mb-1">
+                        <span className="text-sm font-medium text-gray-900">
+                          {comment.author?.username || "Anonymous"}
+                        </span>
+                        <span className="text-sm text-gray-500">
+                          {new Date(comment.createdAt).toLocaleDateString()}
+                        </span>
+                      </div>
+                      <p className="text-gray-800 leading-relaxed">
+                        {comment.content}
+                      </p>
+
+                      {loggedIn &&
+                        currentUser.username === comment.author?.username && (
+                          <DeleteComment
+                            commentId={comment._id}
+                            onDelete={handleDeleteComment}
+                          >
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="opacity-0 group-hover:opacity-100 text-gray-400 hover:text-red-600 px-0 -ml-2"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </DeleteComment>
+                        )}
                     </div>
-                    <p className="text-gray-600 leading-relaxed">{comment.content}</p>
                   </div>
-                  
-                  {loggedIn && currentUser.username === comment.author?.username && (
-                    <DeleteComment commentId={comment._id} onDelete={handleDeleteComment}>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="opacity-0 group-hover:opacity-100 text-gray-400 hover:text-red-600"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </DeleteComment>
-                  )}
                 </div>
-              </Card>
-            ))}
-          </div>
-        ) : (
-          <div className="py-12 text-center">
-            <p className="text-gray-500 text-lg">No comments yet. Start the conversation! 💬</p>
-          </div>
-        )}
+              ))}
+            </div>
+          ) : (
+            <div className="py-12 text-center">
+              <p className="text-gray-500">
+                No comments yet. Be the first to respond.
+              </p>
+            </div>
+          )}
+        </div>
       </div>
     </motion.div>
   );

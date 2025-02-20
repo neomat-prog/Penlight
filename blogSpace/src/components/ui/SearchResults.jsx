@@ -3,6 +3,7 @@ import { useLocation } from "react-router-dom";
 import axios from "axios";
 import { debounce } from "lodash";
 import PostList from "../PostList"; 
+
 const SearchResults = () => {
   const location = useLocation();
   const [posts, setPosts] = useState([]);
