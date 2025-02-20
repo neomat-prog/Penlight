@@ -93,6 +93,20 @@ const PostDetail = ({ loggedIn }) => {
           {post.title}
         </h1>
 
+        <div className="flex items-center ">
+          {post.image && (
+            <div className="relative w-screen max-w-none -mx-4 md:-mx-8 lg:-mx-16 my-12">
+              {/* Image with full width */}
+              <img
+                src={post.image}
+                alt={post.title}
+                className="w-full h-auto object-cover"
+                loading="lazy"
+              />
+            </div>
+          )}
+        </div>
+
         <div className="font-serif text-xl leading-8 text-gray-800 space-y-6">
           {post.content.split("\n").map((line, i) => (
             <p key={i} className="mb-8">

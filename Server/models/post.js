@@ -10,6 +10,10 @@ const postSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+  image: {
+    type: String, // Store the URL or file path of the image
+    default: null, // Optional: Set a default value if no image is provided
+  },
   comments: [
     {
       type: mongoose.Schema.Types.ObjectId,
@@ -21,6 +25,20 @@ const postSchema = new mongoose.Schema({
     ref: "User", // Reference to User model
     required: true,
   },
+  createdAt: {
+    type: Date,
+    default: Date.now, // Automatically set the creation date
+  },
+  updatedAt: {
+    type: Date,
+    default: Date.now, // Automatically set the update date
+  },
+});
+
+// Middleware to update the `updatedAt` field before saving
+postSchema.pre("save", function (next) {
+  this.updatedAt = Date.now();
+  next();
 });
 
 mongoose.set("strictQuery", false);

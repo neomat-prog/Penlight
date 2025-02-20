@@ -27,36 +27,47 @@ app.get("/", (req, res) => {
 });
 
 app.post("/create-post", authMiddleware, async (req, res) => {
-  const { title, content } = req.body;
+  const { title, content, image } = req.body; // Extract image from request body
 
+  // Validate required fields
   if (!title || !content) {
     return res.status(400).json({ message: "Title and content are required." });
   }
 
   try {
+    // Find the user creating the post
     const user = await User.findById(req.userId);
     if (!user) {
       return res.status(404).json({ message: "User not found." });
     }
 
+    // Create the new post
     const newPost = new Post({
       title,
       content,
+      image: image || null, // Set image if provided, otherwise null
       author: user._id,
     });
 
+    // Save the post to the database
     const savedPost = await newPost.save();
 
+    // Add the post to the user's posts array
     user.posts.push(savedPost._id);
     await user.save();
 
+    // Populate the author details in the response
     const postWithAuthor = await Post.findById(savedPost._id)
-      .populate("author", "username")
+      .populate("author", "username") // Include only the username of the author
       .exec();
 
-    res.status(201).json(postWithAuthor);
+    // Send the response
+    res.status(201).json({
+      message: "Post created successfully",
+      post: postWithAuthor,
+    });
   } catch (error) {
-    console.error(error);
+    console.error("Error creating post:", error);
     res.status(500).json({ message: "Failed to create post" });
   }
 });
