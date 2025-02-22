@@ -27,6 +27,7 @@ import PostDetail from "./components/PostDetail";
 import Navbar from "./components/Navbar";
 import AuthPage from "./components/auth/AuthPage";
 import SearchResults from "./components/ui/SearchResults";
+import Profile from "./components/user/Profile";
 
 const App = () => {
   const [posts, setPosts] = useState([]);
@@ -113,9 +114,9 @@ const App = () => {
           username={username}
           onLogOut={handleLogOut}
           onNewPost={handleNewPost}
-          setLoading={setLoading} // Pass setLoading
-          setPosts={setPosts} // Pass setPosts
-          setError={setError} // Pass setError
+          setLoading={setLoading} 
+          setPosts={setPosts}
+          setError={setError} 
         />
 
         <main className="container max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -158,6 +159,7 @@ const App = () => {
               element={<PostDetail loggedIn={loggedIn} />}
             />
             <Route path="/search" element={<SearchResults />} />
+            <Route path="/profile" element={<Profile />} />
           </Routes>
         </main>
 

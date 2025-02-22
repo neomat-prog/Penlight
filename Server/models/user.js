@@ -24,9 +24,17 @@ const userSchema = new mongoose.Schema({
     },
   ],
   comments: [
-    { 
+    {
       type: mongoose.Schema.Types.ObjectId,
-       ref: "Comment" }],
+      ref: "Comment",
+    },
+  ],
+  followers: [
+    { 
+      type: mongoose.Schema.Types.ObjectId, 
+      ref: "User" 
+    }
+  ],
 });
 
 userSchema.set("toJSON", {

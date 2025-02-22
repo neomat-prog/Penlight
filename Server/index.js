@@ -29,39 +29,32 @@ app.get("/", (req, res) => {
 app.post("/create-post", authMiddleware, async (req, res) => {
   const { title, content, image } = req.body; // Extract image from request body
 
-  // Validate required fields
   if (!title || !content) {
     return res.status(400).json({ message: "Title and content are required." });
   }
 
   try {
-    // Find the user creating the post
     const user = await User.findById(req.userId);
     if (!user) {
       return res.status(404).json({ message: "User not found." });
     }
 
-    // Create the new post
     const newPost = new Post({
       title,
       content,
-      image: image || null, // Set image if provided, otherwise null
+      image: image || null,
       author: user._id,
     });
 
-    // Save the post to the database
     const savedPost = await newPost.save();
 
-    // Add the post to the user's posts array
     user.posts.push(savedPost._id);
     await user.save();
 
-    // Populate the author details in the response
     const postWithAuthor = await Post.findById(savedPost._id)
-      .populate("author", "username") // Include only the username of the author
+      .populate("author", "username")
       .exec();
 
-    // Send the response
     res.status(201).json({
       message: "Post created successfully",
       post: postWithAuthor,
@@ -127,8 +120,35 @@ app.delete("/posts/:id", authMiddleware, async (req, res) => {
   }
 });
 
+
+app.get("/posts/:id", async (req, res) => {
+  try {
+    const postId = req.params.id;
+
+    if (!mongoose.Types.ObjectId.isValid(postId)) {
+      return res.status(400).json({ message: "Invalid post ID" });
+    }
+
+    const post = await Post.findById(postId)
+      .populate("author", "username name")
+      .populate({
+        path: "comments",
+        populate: { path: "author", select: "username" },
+      });
+
+    if (!post) {
+      return res.status(404).json({ message: "Post not found" });
+    }
+
+    res.json(post);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Failed to retrieve post" });
+  }
+});
+
 app.get("/posts", async (req, res) => {
-  const { q } = req.query; // Get the search query from the request
+  const { q } = req.query;
 
   try {
     let posts;
@@ -168,58 +188,27 @@ app.get("/search", async (req, res) => {
   }
 });
 
-app.get("/posts/:id", async (req, res) => {
-  try {
-    const postId = req.params.id;
-
-    if (!mongoose.Types.ObjectId.isValid(postId)) {
-      return res.status(400).json({ message: "Invalid post ID" });
-    }
-
-    const post = await Post.findById(postId)
-      .populate("author", "username name")
-      .populate({
-        path: "comments",
-        populate: { path: "author", select: "username" },
-      });
-
-    if (!post) {
-      return res.status(404).json({ message: "Post not found" });
-    }
-
-    res.json(post);
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Failed to retrieve post" });
-  }
-});
-
 app.delete("/comments/:id", authMiddleware, async (req, res) => {
   try {
     const commentId = req.params.id;
 
-    // Validate the comment ID
     if (!mongoose.Types.ObjectId.isValid(commentId)) {
       return res.status(400).json({ message: "Invalid comment ID" });
     }
 
-    // Find the comment by ID
     const comment = await Comment.findById(commentId);
     if (!comment) {
       return res.status(404).json({ message: "Comment not found" });
     }
 
-    // Check if the authenticated user is the author of the comment
     if (comment.author.toString() !== req.userId) {
       return res
         .status(403)
         .json({ message: "Unauthorized to delete this comment" });
     }
 
-    // Delete the comment
     await Comment.findByIdAndDelete(commentId);
 
-    // Remove the comment ID from the associated post's comments array
     await Post.findByIdAndUpdate(comment.post, {
       $pull: { comments: commentId },
     });
@@ -273,19 +262,16 @@ app.post("/add-comment/:id", authMiddleware, async (req, res) => {
   }
 
   try {
-    // Find the authenticated user
     const user = await User.findById(req.userId);
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
 
-    // Find the post by ID
     const post = await Post.findById(postId);
     if (!post) {
       return res.status(404).json({ message: "Post not found" });
     }
 
-    // Create a new comment
     const newComment = new Comment({
       content,
       author: user._id,
@@ -293,18 +279,14 @@ app.post("/add-comment/:id", authMiddleware, async (req, res) => {
       createdAt: new Date(),
     });
 
-    // Save the comment
     const savedComment = await newComment.save();
 
-    // Add the comment to the post
     post.comments.push(savedComment._id);
     await post.save();
 
-    // Add the comment to the user's comments list
     user.comments.push(savedComment._id);
     await user.save();
 
-    // Populate the comment details before sending response
     await savedComment.populate("author", "username");
 
     res.status(201).json({
