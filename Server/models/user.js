@@ -30,20 +30,17 @@ const userSchema = new mongoose.Schema({
     },
   ],
   followers: [
-    { 
-      type: mongoose.Schema.Types.ObjectId, 
-      ref: "User" 
-    }
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+    },
   ],
-});
-
-userSchema.set("toJSON", {
-  transform: (document, returnedObject) => {
-    returnedObject.id = returnedObject._id.toString();
-    delete returnedObject._id;
-    delete returnedObject.__v;
-    delete returnedObject.passwordHash; // Ensure password hash is not exposed
-  },
+  following: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+    },
+  ],
 });
 
 const User = mongoose.model("User", userSchema);
