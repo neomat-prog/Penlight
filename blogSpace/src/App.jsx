@@ -3,31 +3,19 @@ import {
   BrowserRouter as Router,
   Routes,
   Route,
-  useNavigate,
 } from "react-router-dom";
-import {
-  Card,
-  CardHeader,
-  CardContent,
-  CardFooter,
-} from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+
+
 import { Skeleton } from "@/components/ui/skeleton";
 import { Separator } from "@/components/ui/separator";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import axios from "axios";
 import PostList from "./components/PostList";
-import LogInForm from "./components/auth/LogInForm";
-import RegisterForm from "./components/functionality/RegisterForm";
-import LogOut from "./components/auth/LogOut";
-import CreatePost from "./components/functionality/CreatePost";
+
 import PostDetail from "./components/PostDetail";
 import Navbar from "./components/Navbar";
 import AuthPage from "./components/auth/AuthPage";
 import SearchResults from "./components/ui/SearchResults";
-import Profile from "./components/user/Profile";
+import UserProfile from "./components/user/UserProfile";
 
 const App = () => {
   const [posts, setPosts] = useState([]);
@@ -35,7 +23,6 @@ const App = () => {
   const [loggedIn, setLoggedIn] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [showRegister, setShowRegister] = useState(false);
 
   useEffect(() => {
     const authToken = localStorage.getItem("authToken");
@@ -159,7 +146,7 @@ const App = () => {
               element={<PostDetail loggedIn={loggedIn} />}
             />
             <Route path="/search" element={<SearchResults />} />
-            <Route path="/profile" element={<Profile />} />
+            <Route path="/profile/:id" element={<UserProfile />} />
           </Routes>
         </main>
 
