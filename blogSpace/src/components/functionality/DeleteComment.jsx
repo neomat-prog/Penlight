@@ -34,7 +34,7 @@ const DeleteComment = ({onDelete, commentId}) => {
     <div>
       <button onClick={handleDeleteComment}>
         <TiDelete />
-        {isDeletingComment ? "Deleting..." : "Delete"}
+        {isDeletingComment ? "Deleting..." : ""}
       </button>
     </div>
   );

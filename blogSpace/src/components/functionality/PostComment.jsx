@@ -28,42 +28,70 @@ const PostComment = ({ postId, onNewComment }) => {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="mt-6 space-y-4">
-      <div className="relative group">
+    <form
+      onSubmit={handleSubmit}
+      className="w-full max-w-2xl mx-auto space-y-4"
+    >
+      <div className="space-y-4">
         <textarea
           value={comment}
           onChange={(e) => setComment(e.target.value)}
-          placeholder="What are your thoughts?"
-          className="w-full p-4 text-gray-900 bg-transparent border-0 border-b-2 border-gray-200 focus:border-gray-400 focus:ring-0 rounded-none transition-colors placeholder:text-gray-400 placeholder:font-light resize-none"
+          placeholder="Share your thoughts..."
+          className="w-full p-4 text-base bg-white border border-gray-200 rounded-lg shadow-sm 
+                    focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent
+                    placeholder-gray-400 resize-none transition-all duration-200"
           rows="3"
           required
         />
-        <div className="absolute bottom-0 left-0 w-full h-0.5 bg-gray-200 scale-x-0 group-focus-within:scale-x-100 origin-left transition-transform" />
-      </div>
-      
-      <div className="flex justify-end">
-        <button
-          type="submit"
-          className="px-5 py-2.5 text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-full transition-colors flex items-center gap-2"
-          disabled={loading}
-        >
-          {loading ? (
-            <>
-              <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24">
-                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
-                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-              </svg>
-              Posting...
-            </>
-          ) : (
-            <>
-              Respond
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-4 h-4">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M6 12L3.269 3.126A59.768 59.768 0 0121.485 12 59.77 59.77 0 013.27 20.876L5.999 12zm0 0h7.5" />
-              </svg>
-            </>
-          )}
-        </button>
+
+        <div className="flex justify-end">
+          <button
+            type="submit"
+            className="px-6 py-2.5 text-sm font-medium text-black bg-white border border-gray-200 rounded-lg
+                      hover:bg-black hover:text-white hover:border-black
+                      focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2
+                      transition-all duration-200 flex items-center gap-2"
+            disabled={loading}
+          >
+            {loading ? (
+              <>
+                <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24">
+                  <circle
+                    className="opacity-25"
+                    cx="12"
+                    cy="12"
+                    r="10"
+                    stroke="currentColor"
+                    strokeWidth="4"
+                    fill="none"
+                  />
+                  <path
+                    className="opacity-75"
+                    fill="currentColor"
+                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                  />
+                </svg>
+                Posting...
+              </>
+            ) : (
+              <>
+                Post Comment
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-4 w-4"
+                  viewBox="0 0 20 20"
+                  fill="currentColor"
+                >
+                  <path
+                    fillRule="evenodd"
+                    d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-11a1 1 0 10-2 0v2H7a1 1 0 100 2h2v2a1 1 0 102 0v-2h2a1 1 0 100-2h-2V7z"
+                    clipRule="evenodd"
+                  />
+                </svg>
+              </>
+            )}
+          </button>
+        </div>
       </div>
     </form>
   );

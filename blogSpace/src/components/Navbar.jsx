@@ -16,29 +16,8 @@ const Navbar = ({ loggedIn, username, onLogOut, onNewPost, setLoading, setPosts,
   const navigate = useNavigate();
   const [avatarColor, setAvatarColor] = useState("");
 
-  const getRandomColor = () => {
-    const colors = [
-      "bg-gradient-to-r from-rose-500 to-pink-500",
-      "bg-gradient-to-r from-sky-500 to-blue-500",
-      "bg-gradient-to-r from-purple-500 to-indigo-500",
-      "bg-gradient-to-r from-emerald-500 to-teal-500",
-      "bg-gradient-to-r from-amber-500 to-orange-500",
-    ];
-    return colors[Math.floor(Math.random() * colors.length)];
-  };
-
-  useEffect(() => {
-    if (username) {
-      const storedColor = localStorage.getItem(`avatarColor-${username}`);
-      if (storedColor) {
-        setAvatarColor(storedColor);
-      } else {
-        const newColor = getRandomColor();
-        localStorage.setItem(`avatarColor-${username}`, newColor);
-        setAvatarColor(newColor);
-      }
-    }
-  }, [username]);
+  
+  
 
   const getInitial = () => {
     return username ? username.charAt(0).toUpperCase() : "";
@@ -74,14 +53,11 @@ const Navbar = ({ loggedIn, username, onLogOut, onNewPost, setLoading, setPosts,
 
           <DropdownMenu>
             <DropdownMenuTrigger className="outline-none">
-              <Avatar className="ring-2 ring-white/10 hover:ring-indigo-100 transition-all duration-300">
-                <AvatarImage src="" />
-                <AvatarFallback
-                  className={`${avatarColor} text-white font-medium`}
-                >
-                  {getInitial()}
-                </AvatarFallback>
-              </Avatar>
+            <Avatar className="h-12 w-12">
+            <AvatarFallback className="bg-gray-100 text-gray-600 font-medium">
+              {getInitial()}
+            </AvatarFallback>
+          </Avatar>
             </DropdownMenuTrigger>
             <DropdownMenuContent
               align="end"

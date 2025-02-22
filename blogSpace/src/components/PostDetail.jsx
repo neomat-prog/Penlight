@@ -145,45 +145,57 @@ const PostDetail = ({ loggedIn }) => {
 
       {/* Comment Section */}
       <div className="mt-16">
-        <div className="border-t pt-12">
-          <div className="flex items-center justify-between mb-8">
-            <h2 className="text-xl font-bold text-gray-900">
-              Responses ({comments.length})
-            </h2>
-            {loggedIn && (
-              <PostComment postId={postId} onNewComment={handleNewComment} />
-            )}
-          </div>
+  <div className="pt-12">
+    <div className="flex flex-col items-start gap-4 mb-8"> {/* Changed to column layout */}
+      <h2 className="text-2xl font-bold text-gray-900 tracking-tight">
+        Responses ({comments.length})
+      </h2>
+      {loggedIn && (
+        <div className="w-full"> {/* Added container for full width */}
+          <PostComment postId={postId} onNewComment={handleNewComment} />
+        </div>
+      )}
+    </div>
 
           {comments.length > 0 ? (
-            <div className="space-y-8">
+            <div className="space-y-4">
               {comments.map((comment, index) => (
-                <div
+                <Card
                   key={comment._id || `comment-${index}`}
-                  className="pb-8 border-b last:border-b-0 group"
+                  className="p-4 rounded-xl shadow-sm hover:shadow-md transition-shadow group relative"
                 >
-                  <div className="flex gap-4">
-                    <Avatar className="h-8 w-8">
-                      <AvatarFallback className="bg-gray-100 text-gray-600 text-sm">
+                  <div className="flex gap-3">
+                    <Avatar className="h-9 w-9 border-2 border-white shadow-sm">
+                      <AvatarFallback className="bg-gray-100 text-gray-600 text-sm font-medium">
                         {comment.author?.username?.charAt(0).toUpperCase() ||
                           "U"}
                       </AvatarFallback>
                     </Avatar>
-                    <div className="flex-1">
-                      <div className="flex items-center gap-3 mb-1">
-                        <span className="text-sm font-medium text-gray-900">
+
+                    <div className="flex-1 space-y-2">
+                      <div className="flex items-baseline gap-2">
+                        <span className="text-sm font-semibold text-gray-900">
                           {comment.author?.username || "Anonymous"}
                         </span>
-                        <span className="text-sm text-gray-500">
-                          {new Date(comment.createdAt).toLocaleDateString()}
+                        <span className="text-xs text-gray-500">
+                          {new Date(comment.createdAt).toLocaleDateString(
+                            "en-US",
+                            {
+                              month: "short",
+                              day: "numeric",
+                            }
+                          )}
                         </span>
                       </div>
-                      <p className="text-gray-800 leading-relaxed">
+
+                      <p className="text-gray-700 leading-relaxed text-[15px]">
                         {comment.content}
                       </p>
+                    </div>
 
-                      {loggedIn &&
-                        currentUser.username === comment.author?.username && (
+                    {loggedIn &&
+                      currentUser.username === comment.author?.username && (
+                        <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity">
                           <DeleteComment
                             commentId={comment._id}
                             onDelete={handleDeleteComment}
@@ -191,21 +203,21 @@ const PostDetail = ({ loggedIn }) => {
                             <Button
                               variant="ghost"
                               size="sm"
-                              className="opacity-0 group-hover:opacity-100 text-gray-400 hover:text-red-600 px-0 -ml-2"
+                              className="h-8 w-8 p-0 text-gray-400 hover:text-red-600 hover:bg-red-50"
                             >
                               <Trash2 className="h-4 w-4" />
                             </Button>
                           </DeleteComment>
-                        )}
-                    </div>
+                        </div>
+                      )}
                   </div>
-                </div>
+                </Card>
               ))}
             </div>
           ) : (
-            <div className="py-12 text-center">
-              <p className="text-gray-500">
-                No comments yet. Be the first to respond.
+            <div className="py-12 text-center border rounded-xl bg-gray-50">
+              <p className="text-gray-500 text-sm">
+                No comments yet. Be the first to share your thoughts.
               </p>
             </div>
           )}
