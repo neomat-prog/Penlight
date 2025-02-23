@@ -52,7 +52,7 @@ app.post("/create-post", authMiddleware, async (req, res) => {
     await user.save();
 
     const postWithAuthor = await Post.findById(savedPost._id)
-      .populate("author", "username")
+      .populate("author", "username name")
       .exec();
 
     res.status(201).json({
@@ -297,6 +297,27 @@ app.post("/add-comment/:id", authMiddleware, async (req, res) => {
   } catch (error) {
     console.error("Error adding comment:", error);
     res.status(500).json({ message: "Internal Server Error" });
+  }
+});
+
+app.get("/posts/user/:userId", async (req, res) => {
+  try {
+    const userId = req.params.userId;
+
+    
+    if (!mongoose.Types.ObjectId.isValid(userId)) {
+      return res.status(400).json({ message: "Invalid user ID" });
+    }
+
+    
+    const posts = await Post.find({ author: userId })
+      .populate("author", "username name")
+      .sort({ createdAt: -1 });
+
+    res.status(200).json(posts);
+  } catch (error) {
+    console.error("Error fetching user posts:", error);
+    res.status(500).json({ message: "Internal server error" });
   }
 });
 

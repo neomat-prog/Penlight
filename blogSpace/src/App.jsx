@@ -1,10 +1,5 @@
 import { useState, useEffect } from "react";
-import {
-  BrowserRouter as Router,
-  Routes,
-  Route,
-} from "react-router-dom";
-
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 
 import { Skeleton } from "@/components/ui/skeleton";
 import { Separator } from "@/components/ui/separator";
@@ -63,7 +58,9 @@ const App = () => {
     setPosts((prevPosts) => prevPosts.filter((post) => post._id !== postId));
   };
 
-  const handleNewPost = (newPost) => {
+  const handleNewPost = (response) => {
+    console.log("New Post Response:", response); // Debugging
+    const newPost = response.post; // Extract the `post` object
     setPosts((prevPosts) => [newPost, ...prevPosts]);
   };
 
@@ -101,9 +98,9 @@ const App = () => {
           username={username}
           onLogOut={handleLogOut}
           onNewPost={handleNewPost}
-          setLoading={setLoading} 
+          setLoading={setLoading}
           setPosts={setPosts}
-          setError={setError} 
+          setError={setError}
         />
 
         <main className="container max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">

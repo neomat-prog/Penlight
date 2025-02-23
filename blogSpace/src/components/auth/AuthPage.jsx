@@ -9,7 +9,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import LogInForm from "./LogInForm";
-import RegisterForm from "../functionality/RegisterForm";
+import RegisterForm from "./RegisterForm";
 
 const AuthPage = ({ loggedIn, setLoggedIn, setUsername }) => {
   const [showRegister, setShowRegister] = useState(false);
