@@ -68,7 +68,7 @@ const Navbar = ({
               <DropdownMenu>
                 <DropdownMenuTrigger className="outline-none">
                   <Avatar className="h-12 w-12 rounded-full border-2 border-blue-50 hover:border-blue-100 transition-colors">
-                    <AvatarFallback className="bg-blue-100 text-blue-800 text-2xl font-bold flex items-center justify-center">
+                    <AvatarFallback className="bg-blue-100 text-blue-800  font-bold flex items-center justify-center">
                       {getInitial()}
                     </AvatarFallback>
                   </Avatar>
