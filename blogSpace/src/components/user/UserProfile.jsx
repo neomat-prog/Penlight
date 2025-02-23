@@ -25,8 +25,6 @@ const UserProfile = () => {
           },
         });
 
-        console.log(response)
-
         setUser(response.data.data);
       } catch (err) {
         setError(err.response?.data?.message || "Failed to fetch user data");

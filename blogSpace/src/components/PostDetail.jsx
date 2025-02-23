@@ -10,6 +10,7 @@ import PostComment from "./functionality/PostComment";
 import DeleteComment from "./functionality/DeleteComment";
 import { Alert } from "@/components/ui/alert";
 import { Trash2 } from "lucide-react";
+import { Link } from "react-router-dom";
 
 const PostDetail = ({ loggedIn }) => {
   const { postId } = useParams();
@@ -117,11 +118,13 @@ const PostDetail = ({ loggedIn }) => {
 
         {/* Author Section */}
         <div className="flex items-center gap-3 mt-16 pt-8 border-t">
-          <Avatar className="h-12 w-12">
-            <AvatarFallback className="bg-gray-100 text-gray-600 font-medium">
-              {post.author?.username?.charAt(0).toUpperCase() || "A"}
-            </AvatarFallback>
-          </Avatar>
+          <Link to={`/profile/${post.author?._id}`}>
+            <Avatar className="h-12 w-12">
+              <AvatarFallback className="bg-gray-100 text-gray-600 font-medium">
+                {post.author?.username?.charAt(0).toUpperCase() || "A"}
+              </AvatarFallback>
+            </Avatar>
+          </Link>
           <div>
             <p className="text-sm font-medium text-gray-900">
               {post.author?.username || "Anonymous"}
@@ -145,17 +148,21 @@ const PostDetail = ({ loggedIn }) => {
 
       {/* Comment Section */}
       <div className="mt-16">
-  <div className="pt-12">
-    <div className="flex flex-col items-start gap-4 mb-8"> {/* Changed to column layout */}
-      <h2 className="text-2xl font-bold text-gray-900 tracking-tight">
-        Responses ({comments.length})
-      </h2>
-      {loggedIn && (
-        <div className="w-full"> {/* Added container for full width */}
-          <PostComment postId={postId} onNewComment={handleNewComment} />
-        </div>
-      )}
-    </div>
+        <div className="pt-12">
+          <div className="flex flex-col items-start gap-4 mb-8">
+            {" "}
+            {/* Changed to column layout */}
+            <h2 className="text-2xl font-bold text-gray-900 tracking-tight">
+              Responses ({comments.length})
+            </h2>
+            {loggedIn && (
+              <div className="w-full">
+                {" "}
+                {/* Added container for full width */}
+                <PostComment postId={postId} onNewComment={handleNewComment} />
+              </div>
+            )}
+          </div>
 
           {comments.length > 0 ? (
             <div className="space-y-4">
@@ -165,12 +172,14 @@ const PostDetail = ({ loggedIn }) => {
                   className="p-4 rounded-xl shadow-sm hover:shadow-md transition-shadow group relative"
                 >
                   <div className="flex gap-3">
-                    <Avatar className="h-9 w-9 border-2 border-white shadow-sm">
-                      <AvatarFallback className="bg-gray-100 text-gray-600 text-sm font-medium">
-                        {comment.author?.username?.charAt(0).toUpperCase() ||
-                          "U"}
-                      </AvatarFallback>
-                    </Avatar>
+                    <Link to={`/profile/${comment.author?._id}`}>
+                      <Avatar className="h-9 w-9 border-2 border-white shadow-sm">
+                        <AvatarFallback className="bg-gray-100 text-gray-600 text-sm font-medium">
+                          {comment.author?.username?.charAt(0).toUpperCase() ||
+                            "U"}
+                        </AvatarFallback>
+                      </Avatar>
+                    </Link>
 
                     <div className="flex-1 space-y-2">
                       <div className="flex items-baseline gap-2">

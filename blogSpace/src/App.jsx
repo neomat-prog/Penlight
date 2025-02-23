@@ -11,6 +11,7 @@ import Navbar from "./components/Navbar";
 import AuthPage from "./components/auth/AuthPage";
 import SearchResults from "./components/ui/SearchResults";
 import UserProfile from "./components/user/UserProfile";
+import UserList from "./components/UserList";
 
 const App = () => {
   const [posts, setPosts] = useState([]);
@@ -22,7 +23,7 @@ const App = () => {
   useEffect(() => {
     const authToken = localStorage.getItem("authToken");
     const user = JSON.parse(localStorage.getItem("user"));
-  
+
     if (authToken && user) {
       setLoggedIn(true);
       setUsername(user.username);
@@ -143,6 +144,7 @@ const App = () => {
             />
             <Route path="/search" element={<SearchResults />} />
             <Route path="/profile/:id" element={<UserProfile />} />
+            <Route path="/users" element={<UserList />} />
           </Routes>
         </main>
 
