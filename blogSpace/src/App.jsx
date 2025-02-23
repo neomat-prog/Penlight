@@ -21,13 +21,12 @@ const App = () => {
 
   useEffect(() => {
     const authToken = localStorage.getItem("authToken");
-    const userData = JSON.parse(localStorage.getItem("user"));
-
-    if (authToken && userData) {
+    const user = JSON.parse(localStorage.getItem("user"));
+  
+    if (authToken && user) {
       setLoggedIn(true);
-      setUsername(userData.username);
+      setUsername(user.username);
     }
-    setLoading(false);
   }, []);
 
   const fetchPosts = async () => {

@@ -9,12 +9,11 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { LogOut } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import CreatePost from "./functionality/CreatePost";
-
 import SearchPosts from "./search/SearchPosts";
 
 const Navbar = ({
   loggedIn,
-  username,
+  username: propUsername,
   onLogOut,
   onNewPost,
   setLoading,
@@ -22,8 +21,17 @@ const Navbar = ({
   setError,
 }) => {
   const navigate = useNavigate();
+  const [username, setUsername] = useState(propUsername || "");
 
-  console.log(username)
+  useEffect(() => {
+    if (!propUsername) {
+      const user = JSON.parse(localStorage.getItem("user"));
+      if (user && user.username) {
+        setUsername(user.username);
+      }
+    }
+  }, [propUsername]);
+
   const getInitial = () => {
     return username ? username.charAt(0).toUpperCase() : "";
   };

@@ -26,6 +26,8 @@ app.get("/", (req, res) => {
   res.send("Welcome to the Blog API running on PORT 3001");
 });
 
+
+
 app.post("/create-post", authMiddleware, async (req, res) => {
   const { title, content, image } = req.body; // Extract image from request body
 
