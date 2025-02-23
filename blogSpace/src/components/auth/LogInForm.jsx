@@ -1,9 +1,7 @@
 import PropTypes from "prop-types";
 import { useState } from "react";
 import axios from "axios";
-import { useNavigate } from 'react-router-dom';
-
-
+import { useNavigate } from "react-router-dom";
 
 const LogInForm = ({ setLoggedIn, setUsername }) => {
   const [username, setUsernameInput] = useState("");
@@ -18,30 +16,46 @@ const LogInForm = ({ setLoggedIn, setUsername }) => {
         password,
       });
 
+      console.log("Login response:", response.data);
+
       localStorage.setItem("authToken", response.data.token);
       localStorage.setItem(
         "user",
         JSON.stringify({
-          id: response.data.userId,
-          username: response.data.username,
-          name: response.data.name,
+          id: response.data.user.id,
+          username: response.data.user.username,
+          name: response.data.user.name,
         })
       );
 
+      
+
+      
+
+
       setLoggedIn(true);
       setUsername(response.data.username);
-      navigate('/');
+      navigate("/");
     } catch (err) {
       setError(err.response?.data?.message || "Invalid username or password.");
       console.error("Login error:", err.response?.data);
     }
   };
 
+  console.log(
+    "Username from local storage:",
+    JSON.parse(localStorage.getItem("user"))
+  );
   return (
     <div className="max-w-2xl mx-auto px-4 py-8">
-      <form onSubmit={handleSubmit} className="space-y-6 bg-white p-8 rounded-xl shadow-sm border border-gray-100">
-        <h1 className="text-3xl font-bold text-gray-900 mb-8 tracking-tight">Welcome Back</h1>
-        
+      <form
+        onSubmit={handleSubmit}
+        className="space-y-6 bg-white p-8 rounded-xl shadow-sm border border-gray-100"
+      >
+        <h1 className="text-3xl font-bold text-gray-900 mb-8 tracking-tight">
+          Welcome Back
+        </h1>
+
         <div>
           <label className="block text-sm font-medium text-gray-600 mb-2">
             Username

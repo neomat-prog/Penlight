@@ -9,12 +9,12 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { LogOut } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import CreatePost from "./functionality/CreatePost";
-
 import SearchPosts from "./search/SearchPosts";
+import { User } from "lucide-react";
 
 const Navbar = ({
   loggedIn,
-  username,
+  username: propUsername,
   onLogOut,
   onNewPost,
   setLoading,
@@ -22,8 +22,21 @@ const Navbar = ({
   setError,
 }) => {
   const navigate = useNavigate();
+  const [username, setUsername] = useState(propUsername || "");
+  const userString = localStorage.getItem("user");
+  const user = JSON.parse(userString);
+  const userId = user?.id;
+  console.log(userId);
 
-  console.log(username)
+  useEffect(() => {
+    if (!propUsername) {
+      const user = JSON.parse(localStorage.getItem("user"));
+      if (user && user.username) {
+        setUsername(user.username);
+      }
+    }
+  }, [propUsername]);
+
   const getInitial = () => {
     return username ? username.charAt(0).toUpperCase() : "";
   };
@@ -60,7 +73,7 @@ const Navbar = ({
               <DropdownMenu>
                 <DropdownMenuTrigger className="outline-none">
                   <Avatar className="h-12 w-12 rounded-full border-2 border-blue-50 hover:border-blue-100 transition-colors">
-                    <AvatarFallback className="bg-blue-100 text-blue-800 text-2xl font-bold flex items-center justify-center">
+                    <AvatarFallback className="bg-blue-100 text-blue-800  font-bold flex items-center justify-center">
                       {getInitial()}
                     </AvatarFallback>
                   </Avatar>
@@ -69,6 +82,12 @@ const Navbar = ({
                   align="end"
                   className="rounded-xl shadow-lg border border-gray-100 mt-2 py-2 w-48"
                 >
+                  <DropdownMenuItem
+                    className="flex items-center px-4 py-3 hover:bg-gray-50/80 cursor-pointer text-gray-700 hover:text-gray-900 transition-colors"
+                    onClick={() => navigate(`/profile/${userId}`)}
+                  >
+                    <User className="mr-3 h-4 w-4 text-gray-400" /> Profile
+                  </DropdownMenuItem>
                   <DropdownMenuItem
                     onClick={onLogOut}
                     className="flex items-center px-4 py-3 hover:bg-gray-50/80 cursor-pointer text-gray-700 hover:text-gray-900 transition-colors"
