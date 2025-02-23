@@ -57,47 +57,46 @@ const PostList = ({ posts, loading, error, onDelete, loggedIn, onEdit }) => {
   return (
     <div className="space-y-8 max-w-3xl mx-auto">
       {posts.length > 0 ? (
-        posts.map((post) => (
-          <article
-  key={post._id}
-  className="bg-white p-6 hover:bg-gray-100 transition-colors duration-200 shadow-sm hover:shadow-md hover:shadow-gray-300"
->
+        posts.map((post) => {
+          console.log("Rendering Post:", post._id); // Debugging
+          return (
+            <article key={post._id}
+              className="bg-white p-6 hover:bg-gray-100 transition-colors duration-200 shadow-sm hover:shadow-md hover:shadow-gray-300"
+            >
+              <div className="mb-4">
+                <div className="flex items-center text-sm text-gray-500 space-x-2 mb-3">
+                  <span className="font-medium">
+                    {post.author?.name || "Anonymous"}
+                  </span>
+                  <span>·</span>
+                  <span>{post.date || "1 day ago"}</span>
+                  <span>·</span>
+                  <span>{post.readTime || "4 min read"}</span>
+                </div>
 
-            <div className="mb-4">
-              <div className="flex items-center text-sm text-gray-500 space-x-2 mb-3">
-                <span className="font-medium">
-                  {post.author?.name || "Anonymous"}
-                </span>
-                <span>·</span>
-                <span>{post.date || "1 day ago"}</span>
-                <span>·</span>
-                <span>{post.readTime || "4 min read"}</span>
+                <Link to={`/posts/${post._id}`} className="block">
+                  <h3 className="text-2xl font-bold text-gray-900 mb-3 font-serif">
+                    {post.title}
+                  </h3>
+                  <p className="text-gray-700 leading-relaxed font-serif line-clamp-3">
+                    {post.content}
+                  </p>
+                </Link>
               </div>
 
-              <Link to={`/posts/${post._id}`} className="block">
-                <h3 className="text-2xl font-bold text-gray-900 mb-3 font-serif">
-                  {post.title}
-                </h3>
-                <p className="text-gray-700 leading-relaxed font-serif line-clamp-3">
-                  {post.content}
-                </p>
-              </Link>
-            </div>
-
-            <div className="mt-4">
-              <Link
-                to={`/posts/${post._id}`}
-                className="text-gray-500 text-sm hover:text-gray-700 flex items-center"
-              >
-                <span className="mr-1">Continue reading</span>
-                <span className="text-gray-400 mx-1">-</span>
-                <span>{post.readTime || "4 min read"}</span>
-              </Link>
-            </div>
-
-            
-          </article>
-        ))
+              <div className="mt-4">
+                <Link
+                  to={`/posts/${post._id}`}
+                  className="text-gray-500 text-sm hover:text-gray-700 flex items-center"
+                >
+                  <span className="mr-1">Continue reading</span>
+                  <span className="text-gray-400 mx-1">-</span>
+                  <span>{post.readTime || "4 min read"}</span>
+                </Link>
+              </div>
+            </article>
+          );
+        })
       ) : (
         <p className="text-center py-12 text-gray-500 text-xl">
           Nothing to show yet. Be the first to share something!
