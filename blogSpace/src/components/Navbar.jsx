@@ -10,6 +10,7 @@ import { LogOut } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import CreatePost from "./functionality/CreatePost";
 import SearchPosts from "./search/SearchPosts";
+import { User } from "lucide-react";
 
 const Navbar = ({
   loggedIn,
@@ -22,6 +23,10 @@ const Navbar = ({
 }) => {
   const navigate = useNavigate();
   const [username, setUsername] = useState(propUsername || "");
+  const userString = localStorage.getItem("user");
+  const user = JSON.parse(userString);
+  const userId = user?.id;
+  console.log(userId);
 
   useEffect(() => {
     if (!propUsername) {
@@ -77,6 +82,12 @@ const Navbar = ({
                   align="end"
                   className="rounded-xl shadow-lg border border-gray-100 mt-2 py-2 w-48"
                 >
+                  <DropdownMenuItem
+                    className="flex items-center px-4 py-3 hover:bg-gray-50/80 cursor-pointer text-gray-700 hover:text-gray-900 transition-colors"
+                    onClick={() => navigate(`/profile/${userId}`)}
+                  >
+                    <User className="mr-3 h-4 w-4 text-gray-400" /> Profile
+                  </DropdownMenuItem>
                   <DropdownMenuItem
                     onClick={onLogOut}
                     className="flex items-center px-4 py-3 hover:bg-gray-50/80 cursor-pointer text-gray-700 hover:text-gray-900 transition-colors"

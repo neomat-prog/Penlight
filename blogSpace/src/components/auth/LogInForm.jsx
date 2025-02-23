@@ -22,7 +22,7 @@ const LogInForm = ({ setLoggedIn, setUsername }) => {
       localStorage.setItem(
         "user",
         JSON.stringify({
-          id: response.data.user.userId,
+          id: response.data.user.id,
           username: response.data.user.username,
           name: response.data.user.name,
         })
