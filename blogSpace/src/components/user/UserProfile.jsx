@@ -1,56 +1,22 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import axios from "axios";
 import { useParams } from "react-router-dom";
 import PostList from "../PostList";
 import useFetchPosts from "../../hooks/useFetchPosts";
+import useFollow from "../../hooks/useFollow"; // Import the new hook
 import { Button } from "@/components/ui/button";
 
 const UserProfile = ({ loggedIn }) => {
   const { id } = useParams();
-  const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [isFollowing, setIsFollowing] = useState(false);
+  const [user, setUser] = React.useState(null);
+  const [loading, setLoading] = React.useState(true);
+  const [error, setError] = React.useState(null);
   const { posts, loading: postsLoading, error: postsError } = useFetchPosts(id);
   const currentUser = JSON.parse(localStorage.getItem("user"))?.id;
 
-  const handleFollow = async () => {
-    try {
-      const token = localStorage.getItem("authToken");
-      if (!token) {
-        throw new Error("No token found—please log in!");
-      }
+  // Use the follow hook
+  const { isFollowing, setIsFollowing, followerCount, setFollowerCount, handleFollow } = useFollow(id);
 
-      if (isFollowing) {
-        await axios.post(
-          `http://localhost:3001/users/unfollow/${id}`,
-          {},
-          { headers: { Authorization: `Bearer ${token}` } }
-        );
-        setUser((prevUser) => ({
-          ...prevUser,
-          followerCount: prevUser.followerCount - 1, // Fixed typo
-        }));
-        setIsFollowing(false);
-        // alert("You unfollowed them!");
-      } else {
-        await axios.post(
-          `http://localhost:3001/users/follow/${id}`,
-          {},
-          { headers: { Authorization: `Bearer ${token}` } }
-        );
-        setUser((prevUser) => ({
-          ...prevUser,
-          followerCount: prevUser.followerCount + 1, // Fixed typo
-        }));
-        setIsFollowing(true);
-        // alert("You followed them!");
-      }
-    } catch (error) {
-      console.error("Follow error:", error.response?.data || error.message);
-      alert("Couldn't follow them!");
-    }
-  };
   useEffect(() => {
     const fetchUser = async () => {
       try {
@@ -64,10 +30,8 @@ const UserProfile = ({ loggedIn }) => {
 
         const userData = response.data.data;
         setUser(userData);
-
-        // Check if the logged-in user is in the followers list
-        const currentUserId = JSON.parse(localStorage.getItem("user"))?.id;
-        setIsFollowing(userData.followers.includes(currentUserId));
+        setIsFollowing(userData.followers.includes(currentUser));
+        setFollowerCount(userData.followerCount); // Initialize follower count
       } catch (err) {
         setError(err.response?.data?.message || "Failed to fetch user data");
       } finally {
@@ -76,7 +40,7 @@ const UserProfile = ({ loggedIn }) => {
     };
 
     fetchUser();
-  }, [id]);
+  }, [id, currentUser]);
 
   if (loading) {
     return (
@@ -119,9 +83,7 @@ const UserProfile = ({ loggedIn }) => {
             {user.username[0].toUpperCase()}
           </span>
         </div>
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">
-          {user.username}
-        </h1>
+        <h1 className="text-3xl font-bold text-gray-900 mb-2">{user.username}</h1>
         <p className="text-gray-600">{user.name}</p>
         {loggedIn && !isOwnProfile && (
           <Button className="mt-5" onClick={handleFollow}>
@@ -132,29 +94,21 @@ const UserProfile = ({ loggedIn }) => {
 
       <div className="grid grid-cols-3 gap-4 mb-8">
         <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-100 text-center">
-          <div className="text-gray-900 font-bold text-xl">
-            {user.postCount}
-          </div>
+          <div className="text-gray-900 font-bold text-xl">{user.postCount}</div>
           <div className="text-gray-500 text-sm">Posts</div>
         </div>
         <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-100 text-center">
-          <div className="text-gray-900 font-bold text-xl">
-            {user.followerCount}
-          </div>
+          <div className="text-gray-900 font-bold text-xl">{followerCount}</div>
           <div className="text-gray-500 text-sm">Followers</div>
         </div>
         <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-100 text-center">
-          <div className="text-gray-900 font-bold text-xl">
-            {user.followingCount}
-          </div>
+          <div className="text-gray-900 font-bold text-xl">{user.followingCount}</div>
           <div className="text-gray-500 text-sm">Following</div>
         </div>
       </div>
 
       <div className="border-t border-gray-100 pt-8">
-        <h2 className="text-xl font-semibold text-gray-900 mb-6">
-          Latest Posts
-        </h2>
+        <h2 className="text-xl font-semibold text-gray-900 mb-6">Latest Posts</h2>
         <PostList
           posts={posts}
           loading={postsLoading}

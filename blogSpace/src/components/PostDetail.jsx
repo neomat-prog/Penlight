@@ -4,13 +4,14 @@ import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Skeleton } from "@/components/ui/skeleton";
 import PostComment from "./functionality/PostComment";
 import DeleteComment from "./functionality/DeleteComment";
 import { Alert } from "@/components/ui/alert";
 import { Trash2 } from "lucide-react";
 import { Link } from "react-router-dom";
+import useFollow from "../hooks/useFollow"; // Import the hook
 
 const PostDetail = ({ loggedIn }) => {
   const { postId } = useParams();
@@ -18,18 +19,28 @@ const PostDetail = ({ loggedIn }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [comments, setComments] = useState([]);
-
-  // Get the current user from localStorage
   const currentUser = JSON.parse(localStorage.getItem("user")) || {};
+
+  // Use the follow hook for the post's author
+  const { isFollowing, setIsFollowing, handleFollow } = useFollow(post?.author?._id);
 
   useEffect(() => {
     const fetchPost = async () => {
       try {
-        const response = await axios.get(
-          `http://localhost:3001/posts/${postId}`
-        );
-        setPost(response.data);
-        setComments(response.data.comments || []);
+        const response = await axios.get(`http://localhost:3001/posts/${postId}`);
+        const postData = response.data;
+        setPost(postData);
+        setComments(postData.comments || []);
+
+        // Check if the current user is following the author
+        const token = localStorage.getItem("authToken");
+        if (token && postData.author?._id) {
+          const userResponse = await axios.get(
+            `http://localhost:3001/users/${postData.author._id}`,
+            { headers: { Authorization: `Bearer ${token}` } }
+          );
+          setIsFollowing(userResponse.data.data.followers.includes(currentUser.id));
+        }
       } catch (err) {
         setError(err.message);
       } finally {
@@ -38,10 +49,10 @@ const PostDetail = ({ loggedIn }) => {
     };
 
     fetchPost();
-  }, [postId]);
+  }, [postId, currentUser.id]);
 
   const handleNewComment = (newComment) => {
-    setComments((prev) => [newComment, ...prev]); // Add new comment to state
+    setComments((prev) => [newComment, ...prev]);
   };
 
   const handleDeleteComment = (deletedCommentId) => {
@@ -82,41 +93,36 @@ const PostDetail = ({ loggedIn }) => {
       </Alert>
     );
 
+  const isOwnProfile = currentUser.id === post.author?._id;
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       className="max-w-2xl mx-auto px-4 py-8"
     >
-      {/* Post Content */}
       <article className="mb-12">
         <h1 className="font-serif text-4xl md:text-5xl font-bold tracking-tight mb-10 text-gray-900">
           {post.title}
         </h1>
 
-        <div className="flex items-center ">
-          {post.image && (
-            <div className="relative w-screen max-w-none -mx-4 md:-mx-8 lg:-mx-16 my-12">
-              {/* Image with full width */}
-              <img
-                src={post.image}
-                alt={post.title}
-                className="w-full h-auto object-cover"
-                loading="lazy"
-              />
-            </div>
-          )}
-        </div>
+        {post.image && (
+          <div className="relative w-screen max-w-none -mx-4 md:-mx-8 lg:-mx-16 my-12">
+            <img
+              src={post.image}
+              alt={post.title}
+              className="w-full h-auto object-cover"
+              loading="lazy"
+            />
+          </div>
+        )}
 
         <div className="font-serif text-xl leading-8 text-gray-800 space-y-6">
           {post.content.split("\n").map((line, i) => (
-            <p key={i} className="mb-8">
-              {line}
-            </p>
+            <p key={i} className="mb-8">{line}</p>
           ))}
         </div>
 
-        {/* Author Section */}
         <div className="flex items-center gap-3 mt-16 pt-8 border-t">
           <Link to={`/profile/${post.author?._id}`}>
             <Avatar className="h-12 w-12">
@@ -137,28 +143,26 @@ const PostDetail = ({ loggedIn }) => {
               })}
             </p>
           </div>
-          <Button
-            variant="outline"
-            className="ml-4 text-gray-600 hover:text-gray-900 hover:bg-gray-100 h-8 px-3"
-          >
-            Follow
-          </Button>
+          {loggedIn && !isOwnProfile && (
+            <Button
+              variant="outline"
+              className="ml-4 text-gray-600 hover:text-gray-900 hover:bg-gray-100 h-8 px-3"
+              onClick={handleFollow}
+            >
+              {isFollowing ? "Unfollow" : "Follow"}
+            </Button>
+          )}
         </div>
       </article>
 
-      {/* Comment Section */}
       <div className="mt-16">
         <div className="pt-12">
           <div className="flex flex-col items-start gap-4 mb-8">
-            {" "}
-            {/* Changed to column layout */}
             <h2 className="text-2xl font-bold text-gray-900 tracking-tight">
               Responses ({comments.length})
             </h2>
             {loggedIn && (
               <div className="w-full">
-                {" "}
-                {/* Added container for full width */}
                 <PostComment postId={postId} onNewComment={handleNewComment} />
               </div>
             )}
@@ -175,8 +179,7 @@ const PostDetail = ({ loggedIn }) => {
                     <Link to={`/profile/${comment.author?._id}`}>
                       <Avatar className="h-9 w-9 border-2 border-white shadow-sm">
                         <AvatarFallback className="bg-gray-100 text-gray-600 text-sm font-medium">
-                          {comment.author?.username?.charAt(0).toUpperCase() ||
-                            "U"}
+                          {comment.author?.username?.charAt(0).toUpperCase() || "U"}
                         </AvatarFallback>
                       </Avatar>
                     </Link>
@@ -187,13 +190,10 @@ const PostDetail = ({ loggedIn }) => {
                           {comment.author?.username || "Anonymous"}
                         </span>
                         <span className="text-xs text-gray-500">
-                          {new Date(comment.createdAt).toLocaleDateString(
-                            "en-US",
-                            {
-                              month: "short",
-                              day: "numeric",
-                            }
-                          )}
+                          {new Date(comment.createdAt).toLocaleDateString("en-US", {
+                            month: "short",
+                            day: "numeric",
+                          })}
                         </span>
                       </div>
 
@@ -202,23 +202,22 @@ const PostDetail = ({ loggedIn }) => {
                       </p>
                     </div>
 
-                    {loggedIn &&
-                      currentUser.username === comment.author?.username && (
-                        <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity">
-                          <DeleteComment
-                            commentId={comment._id}
-                            onDelete={handleDeleteComment}
+                    {loggedIn && currentUser.username === comment.author?.username && (
+                      <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <DeleteComment
+                          commentId={comment._id}
+                          onDelete={handleDeleteComment}
+                        >
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="h-8 w-8 p-0 text-gray-400 hover:text-red-600 hover:bg-red-50"
                           >
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              className="h-8 w-8 p-0 text-gray-400 hover:text-red-600 hover:bg-red-50"
-                            >
-                              <Trash2 className="h-4 w-4" />
-                            </Button>
-                          </DeleteComment>
-                        </div>
-                      )}
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </DeleteComment>
+                      </div>
+                    )}
                   </div>
                 </Card>
               ))}
