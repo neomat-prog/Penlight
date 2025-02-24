@@ -1,80 +1,65 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-
 import { Skeleton } from "@/components/ui/skeleton";
 import { Separator } from "@/components/ui/separator";
-import axios from "axios";
-import PostList from "./components/PostList";
 
+import PostList from "./components/PostList";
 import PostDetail from "./components/PostDetail";
 import Navbar from "./components/Navbar";
 import AuthPage from "./components/auth/AuthPage";
 import SearchResults from "./components/ui/SearchResults";
 import UserProfile from "./components/user/UserProfile";
 import UserList from "./components/UserList";
+import useFetchPosts from "./hooks/useFetchPosts"; // Adjust the import path as needed
 
-const App = () => {
-  const [posts, setPosts] = useState([]);
-  const [username, setUsername] = useState("");
+// Custom hook for authentication
+const useAuth = () => {
   const [loggedIn, setLoggedIn] = useState(false);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [username, setUsername] = useState("");
 
   useEffect(() => {
     const authToken = localStorage.getItem("authToken");
     const user = JSON.parse(localStorage.getItem("user"));
-
     if (authToken && user) {
       setLoggedIn(true);
       setUsername(user.username);
     }
   }, []);
 
-  const fetchPosts = async () => {
-    setLoading(true);
-    try {
-      const response = await axios.get("http://localhost:3001/posts");
-      setPosts(response.data);
-    } catch (error) {
-      console.error("Error fetching posts:", error);
-      setError(error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchPosts();
-  }, []);
-
-  const handleLogOut = () => {
+  const logOut = () => {
     setLoggedIn(false);
     setUsername("");
     localStorage.removeItem("user");
     localStorage.removeItem("authToken");
   };
 
-  const handleDeletePost = (postId) => {
-    setPosts((prevPosts) => prevPosts.filter((post) => post._id !== postId));
-  };
+  return { loggedIn, username, setLoggedIn, setUsername, logOut };
+};
 
-  const handleNewPost = (response) => {
-    console.log("New Post Response:", response); // Debugging
-    const newPost = response.post; // Extract the `post` object
-    setPosts((prevPosts) => [newPost, ...prevPosts]);
-  };
+const App = () => {
+  const { loggedIn, username, setLoggedIn, setUsername, logOut } = useAuth();
+  const { posts, loading, error } = useFetchPosts(); 
 
-  const handleEdit = () => {
-    fetchPosts(); // Now this works because it's in scope
-  };
+  const [localPosts, setLocalPosts] = useState(posts);
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <p className="text-gray-600 text-lg">Loading...</p>
-      </div>
-    );
-  }
+  
+  useEffect(() => {
+    setLocalPosts(posts);
+  }, [posts]);
+
+  const handleDeletePost = useCallback((postId) => {
+    setLocalPosts((prevPosts) => prevPosts.filter((post) => post._id !== postId));
+  }, []);
+
+  const handleNewPost = useCallback((response) => {
+    const newPost = response.post;
+    setLocalPosts((prevPosts) => [newPost, ...prevPosts]);
+  }, []);
+
+  const handleEdit = useCallback(() => {
+    
+    setLocalPosts(posts); 
+  }, [posts]);
 
   if (loading) {
     return (
@@ -90,17 +75,22 @@ const App = () => {
     );
   }
 
+  if (error) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <p className="text-red-600 text-lg">{error}</p>
+      </div>
+    );
+  }
+
   return (
     <Router>
       <div className="min-h-screen bg-background font-sans antialiased">
         <Navbar
           loggedIn={loggedIn}
           username={username}
-          onLogOut={handleLogOut}
+          onLogOut={logOut}
           onNewPost={handleNewPost}
-          setLoading={setLoading}
-          setPosts={setPosts}
-          setError={setError}
         />
 
         <main className="container max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -117,7 +107,7 @@ const App = () => {
                       <Separator className="w-24 h-1 bg-primary" />
                     </div>
                     <PostList
-                      posts={posts}
+                      posts={localPosts}
                       loading={loading}
                       error={error}
                       onDelete={handleDeletePost}
@@ -151,8 +141,7 @@ const App = () => {
         <footer className="border border-gray-200 bg-muted/50 mt-24">
           <div className="container max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
             <p className="text-center text-gray-500 text-sm text-muted-foreground">
-              {`© ${new Date().getFullYear()} BlogWave.  `}
-              {` for great stories`}
+              {`© ${new Date().getFullYear()} BlogWave. For great stories`}
             </p>
           </div>
         </footer>
