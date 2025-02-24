@@ -3,14 +3,16 @@ import axios from "axios";
 import { useParams } from "react-router-dom";
 import PostList from "../PostList";
 import useFetchPosts from "../../hooks/useFetchPosts";
+import { Button } from "@/components/ui/button";
 
-const UserProfile = () => {
+const UserProfile = ({ loggedIn }) => {
   const { id } = useParams();
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [isFollowing, setIsFollowing] = useState(false);
   const { posts, loading: postsLoading, error: postsError } = useFetchPosts(id);
+  const currentUser = JSON.parse(localStorage.getItem("user"))?.id;
 
   const handleFollow = async () => {
     try {
@@ -30,7 +32,7 @@ const UserProfile = () => {
           followerCount: prevUser.followerCount - 1, // Fixed typo
         }));
         setIsFollowing(false);
-        alert("You unfollowed them!");
+        // alert("You unfollowed them!");
       } else {
         await axios.post(
           `http://localhost:3001/users/follow/${id}`,
@@ -42,7 +44,7 @@ const UserProfile = () => {
           followerCount: prevUser.followerCount + 1, // Fixed typo
         }));
         setIsFollowing(true);
-        alert("You followed them!");
+        // alert("You followed them!");
       }
     } catch (error) {
       console.error("Follow error:", error.response?.data || error.message);
@@ -107,6 +109,8 @@ const UserProfile = () => {
     );
   }
 
+  const isOwnProfile = currentUser === id;
+
   return (
     <div className="max-w-2xl mx-auto px-4 py-8">
       <div className="text-center mb-8">
@@ -119,7 +123,11 @@ const UserProfile = () => {
           {user.username}
         </h1>
         <p className="text-gray-600">{user.name}</p>
-        <button onClick={handleFollow}>{isFollowing ? "Unfollow" : "Follow"}</button>
+        {loggedIn && !isOwnProfile && (
+          <Button className="mt-5" onClick={handleFollow}>
+            {isFollowing ? "Unfollow" : "Follow"}
+          </Button>
+        )}
       </div>
 
       <div className="grid grid-cols-3 gap-4 mb-8">

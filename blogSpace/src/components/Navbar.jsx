@@ -26,7 +26,7 @@ const Navbar = ({
   const userString = localStorage.getItem("user");
   const user = JSON.parse(userString);
   const userId = user?.id;
-  console.log(userId);
+  // console.log(userId);
 
   useEffect(() => {
     if (!propUsername) {
@@ -64,8 +64,8 @@ const Navbar = ({
           {loggedIn && (
             <div className="flex items-center gap-6">
               <SearchPosts
-                setLoading={setLoading} // Pass setLoading
-                setPosts={setPosts} // Pass setPosts
+                setLoading={setLoading}
+                setPosts={setPosts}
                 setError={setError} // Pass setError
               />
 

@@ -58,7 +58,7 @@ const PostList = ({ posts, loading, error, onDelete, loggedIn, onEdit }) => {
     <div className="space-y-8 max-w-3xl mx-auto">
       {posts.length > 0 ? (
         posts.map((post) => {
-          console.log("Rendering Post:", post._id); // Debugging
+          // console.log("Rendering Post:", post._id); // Debugging
           return (
             <article key={post._id}
               className="bg-white p-6 hover:bg-gray-100 transition-colors duration-200 shadow-sm hover:shadow-md hover:shadow-gray-300"

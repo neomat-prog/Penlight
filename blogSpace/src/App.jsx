@@ -7,12 +7,11 @@ import PostList from "./components/PostList";
 import PostDetail from "./components/PostDetail";
 import Navbar from "./components/Navbar";
 import AuthPage from "./components/auth/AuthPage";
-import SearchResults from "./components/ui/SearchResults";
+import SearchResults from "./components/search/SearchResults";
 import UserProfile from "./components/user/UserProfile";
 import UserList from "./components/UserList";
 import useFetchPosts from "./hooks/useFetchPosts"; // Adjust the import path as needed
 
-// Custom hook for authentication
 const useAuth = () => {
   const [loggedIn, setLoggedIn] = useState(false);
   const [username, setUsername] = useState("");
@@ -133,7 +132,7 @@ const App = () => {
               element={<PostDetail loggedIn={loggedIn} />}
             />
             <Route path="/search" element={<SearchResults />} />
-            <Route path="/profile/:id" element={<UserProfile />} />
+            <Route path="/profile/:id" element={<UserProfile loggedIn={loggedIn} />} />
             <Route path="/users" element={<UserList />} />
           </Routes>
         </main>
