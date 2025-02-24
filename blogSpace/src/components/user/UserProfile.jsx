@@ -3,15 +3,54 @@ import axios from "axios";
 import { useParams } from "react-router-dom";
 import PostList from "../PostList";
 import useFetchPosts from "../../hooks/useFetchPosts";
+import { Button } from "@/components/ui/button";
 
-const UserProfile = () => {
+const UserProfile = ({ loggedIn }) => {
   const { id } = useParams();
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-
+  const [isFollowing, setIsFollowing] = useState(false);
   const { posts, loading: postsLoading, error: postsError } = useFetchPosts(id);
+  const currentUser = JSON.parse(localStorage.getItem("user"))?.id;
 
+  const handleFollow = async () => {
+    try {
+      const token = localStorage.getItem("authToken");
+      if (!token) {
+        throw new Error("No token found—please log in!");
+      }
+
+      if (isFollowing) {
+        await axios.post(
+          `http://localhost:3001/users/unfollow/${id}`,
+          {},
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+        setUser((prevUser) => ({
+          ...prevUser,
+          followerCount: prevUser.followerCount - 1, // Fixed typo
+        }));
+        setIsFollowing(false);
+        // alert("You unfollowed them!");
+      } else {
+        await axios.post(
+          `http://localhost:3001/users/follow/${id}`,
+          {},
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+        setUser((prevUser) => ({
+          ...prevUser,
+          followerCount: prevUser.followerCount + 1, // Fixed typo
+        }));
+        setIsFollowing(true);
+        // alert("You followed them!");
+      }
+    } catch (error) {
+      console.error("Follow error:", error.response?.data || error.message);
+      alert("Couldn't follow them!");
+    }
+  };
   useEffect(() => {
     const fetchUser = async () => {
       try {
@@ -20,14 +59,15 @@ const UserProfile = () => {
 
         const token = localStorage.getItem("authToken");
         const response = await axios.get(`http://localhost:3001/users/${id}`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+          headers: { Authorization: `Bearer ${token}` },
         });
 
-        console.log(response)
+        const userData = response.data.data;
+        setUser(userData);
 
-        setUser(response.data.data);
+        // Check if the logged-in user is in the followers list
+        const currentUserId = JSON.parse(localStorage.getItem("user"))?.id;
+        setIsFollowing(userData.followers.includes(currentUserId));
       } catch (err) {
         setError(err.response?.data?.message || "Failed to fetch user data");
       } finally {
@@ -69,9 +109,10 @@ const UserProfile = () => {
     );
   }
 
+  const isOwnProfile = currentUser === id;
+
   return (
     <div className="max-w-2xl mx-auto px-4 py-8">
-      {/* Profile Header */}
       <div className="text-center mb-8">
         <div className="mb-4">
           <span className="inline-flex items-center justify-center h-20 w-20 rounded-full bg-blue-100 text-blue-800 text-2xl font-bold">
@@ -82,9 +123,13 @@ const UserProfile = () => {
           {user.username}
         </h1>
         <p className="text-gray-600">{user.name}</p>
+        {loggedIn && !isOwnProfile && (
+          <Button className="mt-5" onClick={handleFollow}>
+            {isFollowing ? "Unfollow" : "Follow"}
+          </Button>
+        )}
       </div>
 
-      {/* Stats */}
       <div className="grid grid-cols-3 gap-4 mb-8">
         <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-100 text-center">
           <div className="text-gray-900 font-bold text-xl">
@@ -106,7 +151,6 @@ const UserProfile = () => {
         </div>
       </div>
 
-      {/* Posts Section */}
       <div className="border-t border-gray-100 pt-8">
         <h2 className="text-xl font-semibold text-gray-900 mb-6">
           Latest Posts

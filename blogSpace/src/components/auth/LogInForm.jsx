@@ -16,7 +16,7 @@ const LogInForm = ({ setLoggedIn, setUsername }) => {
         password,
       });
 
-      console.log("Login response:", response.data);
+      // console.log("Login response:", response.data);
 
       localStorage.setItem("authToken", response.data.token);
       localStorage.setItem(
@@ -42,10 +42,10 @@ const LogInForm = ({ setLoggedIn, setUsername }) => {
     }
   };
 
-  console.log(
-    "Username from local storage:",
-    JSON.parse(localStorage.getItem("user"))
-  );
+  // console.log(
+  //   "Username from local storage:",
+  //   JSON.parse(localStorage.getItem("user"))
+  // );
   return (
     <div className="max-w-2xl mx-auto px-4 py-8">
       <form

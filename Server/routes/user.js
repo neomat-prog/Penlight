@@ -16,7 +16,9 @@ userRouter.post("/register", async (req, res) => {
   }
 
   if (password.length < 6) {
-    return res.status(400).json({ message: "Password must be at least 6 characters long." });
+    return res
+      .status(400)
+      .json({ message: "Password must be at least 6 characters long." });
   }
 
   try {
@@ -52,7 +54,9 @@ userRouter.post("/login", async (req, res) => {
   const { username, password } = req.body;
 
   if (!username || !password) {
-    return res.status(400).json({ message: "Username and password are required." });
+    return res
+      .status(400)
+      .json({ message: "Username and password are required." });
   }
 
   try {
@@ -115,6 +119,7 @@ userRouter.get("/:id", async (req, res) => {
         name: user.name,
         postCount: user.posts.length,
         latestPosts: user.posts,
+        followers: user.followers.map((f) => f._id.toString()), 
         followerCount: user.followers.length,
         followingCount: user.following.length,
       },
@@ -131,7 +136,9 @@ userRouter.put("/:id", authMiddleware, async (req, res) => {
     const updates = req.body;
 
     if (req.userId !== userId) {
-      return res.status(403).json({ message: "Unauthorized to update this profile" });
+      return res
+        .status(403)
+        .json({ message: "Unauthorized to update this profile" });
     }
 
     const updatedUser = await User.findByIdAndUpdate(userId, updates, {
@@ -146,6 +153,79 @@ userRouter.put("/:id", authMiddleware, async (req, res) => {
   } catch (error) {
     console.error("Error updating profile:", error);
     res.status(500).json({ message: "Internal server error" });
+  }
+});
+
+userRouter.post("/follow/:id", authMiddleware, async (req, res) => {
+  try {
+    const currentUserId = req.userId; // Now works with authMiddleware
+    const targetUserId = req.params.id; // Changed :id to match route param
+
+    if (currentUserId.toString() === targetUserId) {
+      return res.status(400).json({ message: "You can't follow yourself " });
+    }
+
+    const currentUser = await User.findById(currentUserId);
+    const targetUser = await User.findById(targetUserId);
+
+    if (!targetUser) {
+      return res.status(404).json({ message: "That User isn't available " });
+    }
+
+    if (currentUser.following.includes(targetUserId)) {
+      return res
+        .status(400)
+        .json({ message: "You are already following them! " });
+    }
+
+    currentUser.following.push(targetUserId);
+    targetUser.followers.push(currentUserId);
+
+    await currentUser.save();
+    await targetUser.save();
+
+    res.status(200).json({ message: "Youre now following them! " });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "Something went wrong! " });
+  }
+});
+
+userRouter.post("/unfollow/:id", authMiddleware, async (req, res) => {
+  try {
+    const currentUserId = req.userId; // From authMiddleware
+    const targetUserId = req.params.id;
+
+    if (currentUserId.toString() === targetUserId) {
+      return res.status(400).json({ message: "You can't unfollow yourself " });
+    }
+
+    const currentUser = await User.findById(currentUserId);
+    const targetUser = await User.findById(targetUserId);
+
+    if (!targetUser) {
+      return res.status(404).json({ message: "That User isn't available " });
+    }
+
+    if (!currentUser.following.includes(targetUserId)) {
+      return res.status(400).json({ message: "You aren't following them! " });
+    }
+
+    // Remove from following and followers lists
+    currentUser.following = currentUser.following.filter(
+      (id) => id.toString() !== targetUserId
+    );
+    targetUser.followers = targetUser.followers.filter(
+      (id) => id.toString() !== currentUserId
+    );
+
+    await currentUser.save();
+    await targetUser.save();
+
+    res.status(200).json({ message: "You unfollowed them! " });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "Something went wrong! " });
   }
 });
 
