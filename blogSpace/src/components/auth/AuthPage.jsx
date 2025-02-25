@@ -11,7 +11,7 @@ import { Separator } from "@/components/ui/separator";
 import LogInForm from "./LogInForm";
 import RegisterForm from "./RegisterForm";
 
-const AuthPage = ({ loggedIn, setLoggedIn, setUsername }) => {
+const AuthPage = ({ loggedIn, setLoggedIn, setUsername, setCurrentUserId  }) => {
   const [showRegister, setShowRegister] = useState(false);
   const navigate = useNavigate();
 
@@ -37,6 +37,7 @@ const AuthPage = ({ loggedIn, setLoggedIn, setUsername }) => {
             <RegisterForm
               setLoggedIn={setLoggedIn}
               setUsername={setUsername}
+              setCurrentUserId={setCurrentUserId}
             />
           ) : (
             <LogInForm

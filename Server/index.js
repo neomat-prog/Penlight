@@ -114,16 +114,14 @@ app.delete("/posts/:id", authMiddleware, async (req, res) => {
     if (!post) {
       return res.status(404).json({ message: "Post not found" });
     }
-    if (post.author.toString() !== req.userId) {
-      return res
-        .status(403)
-        .json({ message: "You are not authorized to delete this post" });
+    if (post.author.toString() !== req.user.id) { // Fixed from req.userId
+      return res.status(403).json({ message: "You are not authorized to delete this post" });
     }
     await Post.findByIdAndDelete(postId);
-    await User.findByIdAndUpdate(req.userId, { $pull: { posts: postId } });
+    await User.findByIdAndUpdate(req.user.id, { $pull: { posts: postId } }); // Fixed
     res.status(200).json({ message: "Post deleted successfully" });
   } catch (error) {
-    res.status(500).json(message, "Failed to delete post");
+    res.status(500).json({ message: "Failed to delete post" }); // Fixed syntax
   }
 });
 

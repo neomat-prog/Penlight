@@ -16,7 +16,7 @@ const LogInForm = ({ setLoggedIn, setUsername }) => {
         password,
       });
 
-      // console.log("Login response:", response.data);
+      console.log("Login response:", response.data);
 
       localStorage.setItem("authToken", response.data.token);
       localStorage.setItem(

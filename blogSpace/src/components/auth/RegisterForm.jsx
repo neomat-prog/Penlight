@@ -1,8 +1,9 @@
+
 import { useState } from "react";
 import axios from "axios";
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from "react-router-dom";
 
-const RegisterForm = ({ setLoggedIn, setUsername }) => {
+const RegisterForm = ({ setLoggedIn, setUsername, setCurrentUserId }) => {
   const [username, setUsernameInput] = useState("");
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
@@ -14,7 +15,7 @@ const RegisterForm = ({ setLoggedIn, setUsername }) => {
     e.preventDefault();
     setError("");
     setLoading(true);
-  
+
     try {
       const response = await axios.post("http://localhost:3001/users/register", {
         username,
@@ -22,18 +23,22 @@ const RegisterForm = ({ setLoggedIn, setUsername }) => {
         name,
       });
 
-      // Successful registration
+      const userData = response.data.data;
       localStorage.setItem("authToken", response.data.token);
-      localStorage.setItem("user", JSON.stringify({
-        id: response.data.userId,
-        username: response.data.username,
-        name: response.data.name,
-      }));
+      localStorage.setItem(
+        "user",
+        JSON.stringify({
+          id: userData.id,
+          username: userData.username,
+          name: userData.name,
+        })
+      );
 
-      setUsername(response.data.username);
+      setUsername(userData.username);
       setLoggedIn(true);
-      navigate('/');
-
+      setCurrentUserId(userData.id); // Update auth state
+      navigate(`/profile/${userData.id}`);
+      console.log("Redirecting to profile with ID:", userData.id);
     } catch (err) {
       setError(err.response?.data?.message || "An error occurred during registration.");
       console.error("Registration Error:", err.response?.data || err);
@@ -41,7 +46,6 @@ const RegisterForm = ({ setLoggedIn, setUsername }) => {
       setLoading(false);
     }
   };
-
   return (
     <div className="max-w-2xl mx-auto px-4 py-8">
       <form onSubmit={handleSubmit} className="space-y-6 bg-white p-8 rounded-xl shadow-sm border border-gray-100">
