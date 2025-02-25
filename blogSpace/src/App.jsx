@@ -15,7 +15,7 @@ import useFetchPosts from "./hooks/useFetchPosts";
 const useAuth = () => {
   const [loggedIn, setLoggedIn] = useState(false);
   const [username, setUsername] = useState("");
-  const [currentUserId, setCurrentUserId] = useState(null); // Add this
+  const [currentUserId, setCurrentUserId] = useState(null); 
 
   useEffect(() => {
     const authToken = localStorage.getItem("authToken");
@@ -23,7 +23,7 @@ const useAuth = () => {
     if (authToken && user) {
       setLoggedIn(true);
       setUsername(user.username);
-      setCurrentUserId(user.id); // Set on mount
+      setCurrentUserId(user.id); 
     }
   }, []);
 
