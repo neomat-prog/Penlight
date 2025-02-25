@@ -158,7 +158,7 @@ userRouter.put("/:id", authMiddleware, async (req, res) => {
 
 userRouter.post("/follow/:id", authMiddleware, async (req, res) => {
   try {
-    const currentUserId = req.userId; // Now works with authMiddleware
+    const currentUserId = req.user.id; // Now works with authMiddleware
     const targetUserId = req.params.id; // Changed :id to match route param
 
     if (currentUserId.toString() === targetUserId) {
@@ -193,7 +193,7 @@ userRouter.post("/follow/:id", authMiddleware, async (req, res) => {
 
 userRouter.post("/unfollow/:id", authMiddleware, async (req, res) => {
   try {
-    const currentUserId = req.userId; // From authMiddleware
+    const currentUserId = req.user.id; // From authMiddleware
     const targetUserId = req.params.id;
 
     if (currentUserId.toString() === targetUserId) {
