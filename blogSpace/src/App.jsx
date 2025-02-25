@@ -1,8 +1,8 @@
+// App.jsx
 import { useState, useEffect, useCallback } from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Separator } from "@/components/ui/separator";
-
 import PostList from "./components/PostList";
 import PostDetail from "./components/PostDetail";
 import Navbar from "./components/Navbar";
@@ -10,11 +10,12 @@ import AuthPage from "./components/auth/AuthPage";
 import SearchResults from "./components/search/SearchResults";
 import UserProfile from "./components/user/UserProfile";
 import UserList from "./components/UserList";
-import useFetchPosts from "./hooks/useFetchPosts"; // Adjust the import path as needed
+import useFetchPosts from "./hooks/useFetchPosts";
 
 const useAuth = () => {
   const [loggedIn, setLoggedIn] = useState(false);
   const [username, setUsername] = useState("");
+  const [currentUserId, setCurrentUserId] = useState(null); // Add this
 
   useEffect(() => {
     const authToken = localStorage.getItem("authToken");
@@ -22,26 +23,26 @@ const useAuth = () => {
     if (authToken && user) {
       setLoggedIn(true);
       setUsername(user.username);
+      setCurrentUserId(user.id); // Set on mount
     }
   }, []);
 
   const logOut = () => {
     setLoggedIn(false);
     setUsername("");
+    setCurrentUserId(null);
     localStorage.removeItem("user");
     localStorage.removeItem("authToken");
   };
 
-  return { loggedIn, username, setLoggedIn, setUsername, logOut };
+  return { loggedIn, username, currentUserId, setLoggedIn, setUsername, setCurrentUserId, logOut };
 };
 
 const App = () => {
-  const { loggedIn, username, setLoggedIn, setUsername, logOut } = useAuth();
-  const { posts, loading, error } = useFetchPosts(); 
-
+  const { loggedIn, username, currentUserId, setLoggedIn, setUsername, setCurrentUserId, logOut } = useAuth();
+  const { posts, loading, error } = useFetchPosts();
   const [localPosts, setLocalPosts] = useState(posts);
 
-  
   useEffect(() => {
     setLocalPosts(posts);
   }, [posts]);
@@ -56,31 +57,11 @@ const App = () => {
   }, []);
 
   const handleEdit = useCallback(() => {
-    
-    setLocalPosts(posts); 
+    setLocalPosts(posts);
   }, [posts]);
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="flex items-center space-x-4">
-          <Skeleton className="h-12 w-12 rounded-full" />
-          <div className="space-y-2">
-            <Skeleton className="h-4 w-[250px]" />
-            <Skeleton className="h-4 w-[200px]" />
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <p className="text-red-600 text-lg">{error}</p>
-      </div>
-    );
-  }
+  if (loading) return <div>Loading...</div>;
+  if (error) return <div>Error: {error}</div>;
 
   return (
     <Router>
@@ -91,7 +72,6 @@ const App = () => {
           onLogOut={logOut}
           onNewPost={handleNewPost}
         />
-
         <main className="container max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <Routes>
             <Route
@@ -124,6 +104,7 @@ const App = () => {
                   loggedIn={loggedIn}
                   setLoggedIn={setLoggedIn}
                   setUsername={setUsername}
+                  setCurrentUserId={setCurrentUserId} // Pass this
                 />
               }
             />
@@ -132,11 +113,13 @@ const App = () => {
               element={<PostDetail loggedIn={loggedIn} />}
             />
             <Route path="/search" element={<SearchResults />} />
-            <Route path="/profile/:id" element={<UserProfile loggedIn={loggedIn} />} />
+            <Route
+              path="/profile/:id"
+              element={<UserProfile loggedIn={loggedIn} currentUserId={currentUserId} />}
+            />
             <Route path="/users" element={<UserList />} />
           </Routes>
         </main>
-
         <footer className="border border-gray-200 bg-muted/50 mt-24">
           <div className="container max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
             <p className="text-center text-gray-500 text-sm text-muted-foreground">

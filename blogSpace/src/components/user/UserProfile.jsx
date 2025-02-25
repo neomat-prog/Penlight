@@ -3,35 +3,44 @@ import axios from "axios";
 import { useParams } from "react-router-dom";
 import PostList from "../PostList";
 import useFetchPosts from "../../hooks/useFetchPosts";
-import useFollow from "../../hooks/useFollow"; // Import the new hook
+import useFollow from "../../hooks/useFollow";
 import { Button } from "@/components/ui/button";
 
-const UserProfile = ({ loggedIn }) => {
+const UserProfile = ({ loggedIn, currentUserId }) => {
   const { id } = useParams();
   const [user, setUser] = React.useState(null);
   const [loading, setLoading] = React.useState(true);
   const [error, setError] = React.useState(null);
   const { posts, loading: postsLoading, error: postsError } = useFetchPosts(id);
-  const currentUser = JSON.parse(localStorage.getItem("user"))?.id;
-
-  // Use the follow hook
+  
   const { isFollowing, setIsFollowing, followerCount, setFollowerCount, handleFollow } = useFollow(id);
+
+  console.log("User ID from URL:", id);
+  console.log("Current User ID:", currentUserId);
 
   useEffect(() => {
     const fetchUser = async () => {
+      if (!id) {
+        setError("User ID is missing.");
+        setLoading(false);
+        return;
+      }
+
       try {
         setLoading(true);
         setError(null);
 
         const token = localStorage.getItem("authToken");
+        if (!token) throw new Error("No auth token found");
+
         const response = await axios.get(`http://localhost:3001/users/${id}`, {
           headers: { Authorization: `Bearer ${token}` },
         });
 
         const userData = response.data.data;
         setUser(userData);
-        setIsFollowing(userData.followers.includes(currentUser));
-        setFollowerCount(userData.followerCount); // Initialize follower count
+        setIsFollowing(userData.followers.includes(currentUserId));
+        setFollowerCount(userData.followerCount);
       } catch (err) {
         setError(err.response?.data?.message || "Failed to fetch user data");
       } finally {
@@ -40,7 +49,7 @@ const UserProfile = ({ loggedIn }) => {
     };
 
     fetchUser();
-  }, [id, currentUser]);
+  }, [id, currentUserId]);
 
   if (loading) {
     return (
@@ -73,7 +82,7 @@ const UserProfile = ({ loggedIn }) => {
     );
   }
 
-  const isOwnProfile = currentUser === id;
+  const isOwnProfile = currentUserId === id;
 
   return (
     <div className="max-w-2xl mx-auto px-4 py-8">
