@@ -73,7 +73,7 @@ const PostDetail = ({ loggedIn }) => {
       const token = localStorage.getItem("authToken");
       if (!token) throw new Error("No auth token found");
       const updatedPost = { title: editedTitle, content: editedContent };
-      console.log("Sending update:", updatedPost);
+      // console.log("Sending update:", updatedPost); // DEBUG
       const response = await axios.put(
         `http://localhost:3001/posts/${postId}`,
         updatedPost,
