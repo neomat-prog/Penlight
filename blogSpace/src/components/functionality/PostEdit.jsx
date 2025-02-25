@@ -12,7 +12,7 @@ const PostEdit = ({ postId, initialTitle, initialContent, onEdit }) => {
     try {
       const token = localStorage.getItem("authToken");
       const response = await fetch(`http://localhost:3001/posts/${postId}`, {
-        method: "PATCH",
+        method: "PUT", // Changed to PUT
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
@@ -20,9 +20,13 @@ const PostEdit = ({ postId, initialTitle, initialContent, onEdit }) => {
         body: JSON.stringify({ title, content }),
       });
 
-      if (!response.ok) throw new Error("Failed to update post");
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Failed to update post");
+      }
 
-      onEdit(); // Refresh posts list
+      const updatedPost = await response.json();
+      onEdit(updatedPost); // Pass updated post to parent
       setIsEdit(false);
     } catch (error) {
       console.error("Error updating post:", error);
@@ -74,11 +78,11 @@ const PostEdit = ({ postId, initialTitle, initialContent, onEdit }) => {
   );
 };
 
-export default PostEdit;
-
 PostEdit.propTypes = {
   postId: PropTypes.string.isRequired,
   initialTitle: PropTypes.string.isRequired,
   initialContent: PropTypes.string.isRequired,
   onEdit: PropTypes.func.isRequired,
 };
+
+export default PostEdit;

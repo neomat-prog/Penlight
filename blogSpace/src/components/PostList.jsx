@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import PostDelete from "./functionality/PostDelete";
 import PostEdit from "./functionality/PostEdit";
+import { formatDistanceToNow } from "date-fns";
 
 const PostList = ({ posts, loading, error, onDelete, loggedIn, onEdit }) => {
   const currentUser = JSON.parse(localStorage.getItem("user")) || {};
@@ -60,7 +61,8 @@ const PostList = ({ posts, loading, error, onDelete, loggedIn, onEdit }) => {
         posts.map((post) => {
           // console.log("Rendering Post:", post._id); // Debugging
           return (
-            <article key={post._id}
+            <article
+              key={post._id}
               className="bg-white p-6 hover:bg-gray-100 transition-colors duration-200 shadow-sm hover:shadow-md hover:shadow-gray-300"
             >
               <div className="mb-4">
@@ -69,9 +71,14 @@ const PostList = ({ posts, loading, error, onDelete, loggedIn, onEdit }) => {
                     {post.author?.name || "Anonymous"}
                   </span>
                   <span>·</span>
-                  <span>{post.date || "1 day ago"}</span>
+                  <span>
+                    {post.createdAt
+                      ? formatDistanceToNow(new Date(post.createdAt), {
+                          addSuffix: true,
+                        })
+                      : "Just now"}
+                  </span>
                   <span>·</span>
-                  <span>{post.readTime || "4 min read"}</span>
                 </div>
 
                 <Link to={`/posts/${post._id}`} className="block">
@@ -90,8 +97,6 @@ const PostList = ({ posts, loading, error, onDelete, loggedIn, onEdit }) => {
                   className="text-gray-500 text-sm hover:text-gray-700 flex items-center"
                 >
                   <span className="mr-1">Continue reading</span>
-                  <span className="text-gray-400 mx-1">-</span>
-                  <span>{post.readTime || "4 min read"}</span>
                 </Link>
               </div>
             </article>
