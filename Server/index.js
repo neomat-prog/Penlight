@@ -36,7 +36,7 @@ app.post("/create-post", authMiddleware, async (req, res) => {
   }
 
   try {
-    const user = await User.findById(req.userId);
+    const user = await User.findById(req.user.id);
     if (!user) {
       return res.status(404).json({ message: "User not found." });
     }
@@ -69,11 +69,15 @@ app.post("/create-post", authMiddleware, async (req, res) => {
 
 // Editing Endpoint
 
-app.patch("/posts/:id", authMiddleware, async (req, res) => {
+app.put("/posts/:id", authMiddleware, async (req, res) => {
   try {
     const postId = req.params.id;
-    const updates = req.body;
-    const userId = req.userId;
+    const { title, content } = req.body;
+    const userId = req.user.id;
+
+    if (!mongoose.Types.ObjectId.isValid(postId)) {
+      return res.status(400).json({ message: "Invalid post ID" });
+    }
 
     const post = await Post.findById(postId);
     if (!post) {
@@ -81,19 +85,20 @@ app.patch("/posts/:id", authMiddleware, async (req, res) => {
     }
 
     if (post.author.toString() !== userId) {
-      return res
-        .status(403)
-        .json({ message: "Unauthorized to edit this post" });
+      return res.status(403).json({ message: "Unauthorized to edit this post" });
     }
 
-    const updatedPost = await Post.findByIdAndUpdate(postId, updates, {
-      new: true,
-      runValidators: true,
-    }).populate("author", "username");
+    post.title = title || post.title;
+    post.content = content || post.content;
+    post.updatedAt = Date.now();
 
-    res.json(updatedPost);
+    const updatedPost = await post.save();
+    await updatedPost.populate("author", "username"); // Fixed
+
+    res.status(200).json(updatedPost);
   } catch (error) {
-    res.status(500).json({ message: "Error updating post", error });
+    console.error("Error updating post:", error.stack);
+    res.status(500).json({ message: "Error updating post", error: error.message });
   }
 });
 
@@ -203,10 +208,9 @@ app.delete("/comments/:id", authMiddleware, async (req, res) => {
       return res.status(404).json({ message: "Comment not found" });
     }
 
-    if (comment.author.toString() !== req.userId) {
-      return res
-        .status(403)
-        .json({ message: "Unauthorized to delete this comment" });
+    // Use req.user.id instead of req.userId
+    if (comment.author.toString() !== req.user.id) {
+      return res.status(403).json({ message: "Unauthorized to delete this comment" });
     }
 
     await Comment.findByIdAndDelete(commentId);
@@ -256,21 +260,28 @@ app.get("/comments/:id", authMiddleware, async (req, res) => {
 // Add comment to post
 
 app.post("/add-comment/:id", authMiddleware, async (req, res) => {
+  // console.log("Request received at /add-comment/:id");
+  // console.log("Post ID:", req.params.id);
+  // console.log("Request body:", req.body);
+
   const { content } = req.body;
   const postId = req.params.id;
 
   if (!mongoose.Types.ObjectId.isValid(postId)) {
+    console.log("Invalid post ID");
     return res.status(400).json({ message: "Invalid post ID" });
   }
 
   try {
-    const user = await User.findById(req.userId);
+    const user = await User.findById(req.user.id);
     if (!user) {
+      console.log("User not found");
       return res.status(404).json({ message: "User not found" });
     }
 
     const post = await Post.findById(postId);
     if (!post) {
+      console.log("Post not found");
       return res.status(404).json({ message: "Post not found" });
     }
 
@@ -291,6 +302,7 @@ app.post("/add-comment/:id", authMiddleware, async (req, res) => {
 
     await savedComment.populate("author", "username");
 
+    console.log("Comment added successfully");
     res.status(201).json({
       message: "Comment added successfully",
       comment: savedComment,
