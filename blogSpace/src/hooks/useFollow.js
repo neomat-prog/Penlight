@@ -34,9 +34,9 @@ const useFollow = (targetUserId, currentUserId) => { // Add currentUserId as a p
         });
 
         const userData = response.data.data;
-        console.log("Target User Data:", userData);
-        console.log("Current User ID:", currentUserId);
-        console.log("Is Following:", userData.followers.includes(currentUserId));
+        // console.log("Target User Data:", userData);
+        // console.log("Current User ID:", currentUserId);
+        // console.log("Is Following:", userData.followers.includes(currentUserId));
         setIsFollowing(userData.followers.includes(currentUserId));
         setFollowerCount(userData.followerCount || 0);
       } catch (error) {

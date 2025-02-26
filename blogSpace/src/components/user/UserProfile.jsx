@@ -20,7 +20,7 @@ const UserProfile = ({ loggedIn, currentUserId }) => {
     loading: followLoading,
     followActionLoading,
     error: followError,
-  } = useFollow(id, currentUserId); // Pass currentUserId here
+  } = useFollow(id, currentUserId); 
 
   useEffect(() => {
     const fetchUser = async () => {

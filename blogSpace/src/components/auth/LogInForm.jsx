@@ -3,13 +3,15 @@ import { useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 
-const LogInForm = ({ setLoggedIn, setUsername }) => {
+const LogInForm = ({ setLoggedIn, setUsername, setCurrentUserId }) => {
   const [username, setUsernameInput] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const navigate = useNavigate();
+
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setError("");
     try {
       const response = await axios.post("http://localhost:3001/users/login", {
         username,
@@ -18,23 +20,20 @@ const LogInForm = ({ setLoggedIn, setUsername }) => {
 
       console.log("Login response:", response.data);
 
-      localStorage.setItem("authToken", response.data.token);
+      const { user, token } = response.data;
+      localStorage.setItem("authToken", token);
       localStorage.setItem(
         "user",
         JSON.stringify({
-          id: response.data.user.id,
-          username: response.data.user.username,
-          name: response.data.user.name,
+          id: user.id,
+          username: user.username,
+          name: user.name,
         })
       );
 
-      
-
-      
-
-
       setLoggedIn(true);
-      setUsername(response.data.username);
+      setUsername(user.username); // Fixed: use user.username
+      setCurrentUserId(user.id); // Added: set currentUserId
       navigate("/");
     } catch (err) {
       setError(err.response?.data?.message || "Invalid username or password.");
@@ -42,10 +41,6 @@ const LogInForm = ({ setLoggedIn, setUsername }) => {
     }
   };
 
-  // console.log(
-  //   "Username from local storage:",
-  //   JSON.parse(localStorage.getItem("user"))
-  // );
   return (
     <div className="max-w-2xl mx-auto px-4 py-8">
       <form
@@ -68,6 +63,7 @@ const LogInForm = ({ setLoggedIn, setUsername }) => {
                       focus:outline-none focus:ring-2 focus:ring-black
                       placeholder-gray-400 transition-all"
             placeholder="Enter your username"
+            required
           />
         </div>
 
@@ -83,6 +79,7 @@ const LogInForm = ({ setLoggedIn, setUsername }) => {
                       focus:outline-none focus:ring-2 focus:ring-black
                       placeholder-gray-400 transition-all"
             placeholder="Enter your password"
+            required
           />
         </div>
 
@@ -106,4 +103,5 @@ export default LogInForm;
 LogInForm.propTypes = {
   setLoggedIn: PropTypes.func.isRequired,
   setUsername: PropTypes.func.isRequired,
+  setCurrentUserId: PropTypes.func.isRequired, // Added
 };
