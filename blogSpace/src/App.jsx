@@ -1,4 +1,3 @@
-// App.jsx
 import { useState, useEffect, useCallback } from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -15,7 +14,7 @@ import useFetchPosts from "./hooks/useFetchPosts";
 const useAuth = () => {
   const [loggedIn, setLoggedIn] = useState(false);
   const [username, setUsername] = useState("");
-  const [currentUserId, setCurrentUserId] = useState(null); 
+  const [currentUserId, setCurrentUserId] = useState(null);
 
   useEffect(() => {
     const authToken = localStorage.getItem("authToken");
@@ -23,7 +22,7 @@ const useAuth = () => {
     if (authToken && user) {
       setLoggedIn(true);
       setUsername(user.username);
-      setCurrentUserId(user.id); 
+      setCurrentUserId(user.id);
     }
   }, []);
 
@@ -104,19 +103,16 @@ const App = () => {
                   loggedIn={loggedIn}
                   setLoggedIn={setLoggedIn}
                   setUsername={setUsername}
-                  setCurrentUserId={setCurrentUserId} // Pass this
+                  setCurrentUserId={setCurrentUserId}
                 />
               }
             />
             <Route
               path="/posts/:postId"
-              element={<PostDetail loggedIn={loggedIn} />}
+              element={<PostDetail loggedIn={loggedIn} currentUserId={currentUserId} />} // Pass currentUserId
             />
             <Route path="/search" element={<SearchResults />} />
-            <Route
-              path="/profile/:id"
-              element={<UserProfile loggedIn={loggedIn} currentUserId={currentUserId} />}
-            />
+            <Route path="/profile/:id" element={<UserProfile loggedIn={true} currentUserId={currentUserId} />} />
             <Route path="/users" element={<UserList />} />
           </Routes>
         </main>

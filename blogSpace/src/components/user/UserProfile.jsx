@@ -1,6 +1,6 @@
 import React, { useEffect } from "react";
 import axios from "axios";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import PostList from "../PostList";
 import useFetchPosts from "../../hooks/useFetchPosts";
 import useFollow from "../../hooks/useFollow";
@@ -8,20 +8,24 @@ import { Button } from "@/components/ui/button";
 
 const UserProfile = ({ loggedIn, currentUserId }) => {
   const { id } = useParams();
+  const navigate = useNavigate();
   const [user, setUser] = React.useState(null);
   const [loading, setLoading] = React.useState(true);
   const [error, setError] = React.useState(null);
   const { posts, loading: postsLoading, error: postsError } = useFetchPosts(id);
-  
-  const { isFollowing, setIsFollowing, followerCount, setFollowerCount, handleFollow } = useFollow(id);
-
-  console.log("User ID from URL:", id);
-  console.log("Current User ID:", currentUserId);
+  const {
+    isFollowing,
+    followerCount,
+    handleFollow,
+    loading: followLoading,
+    followActionLoading,
+    error: followError,
+  } = useFollow(id, currentUserId); // Pass currentUserId here
 
   useEffect(() => {
     const fetchUser = async () => {
       if (!id) {
-        setError("User ID is missing.");
+        setError("User ID is missing from URL");
         setLoading(false);
         return;
       }
@@ -37,10 +41,7 @@ const UserProfile = ({ loggedIn, currentUserId }) => {
           headers: { Authorization: `Bearer ${token}` },
         });
 
-        const userData = response.data.data;
-        setUser(userData);
-        setIsFollowing(userData.followers.includes(currentUserId));
-        setFollowerCount(userData.followerCount);
+        setUser(response.data.data);
       } catch (err) {
         setError(err.response?.data?.message || "Failed to fetch user data");
       } finally {
@@ -49,9 +50,9 @@ const UserProfile = ({ loggedIn, currentUserId }) => {
     };
 
     fetchUser();
-  }, [id, currentUserId]);
+  }, [id]);
 
-  if (loading) {
+  if (loading || followLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="animate-pulse text-center">
@@ -63,12 +64,15 @@ const UserProfile = ({ loggedIn, currentUserId }) => {
     );
   }
 
-  if (error) {
+  if (error || followError) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="bg-red-50 p-4 rounded-lg max-w-md mx-4">
           <h3 className="text-red-800 font-semibold">Error loading profile:</h3>
-          <p className="text-red-700 mt-2">{error}</p>
+          <p className="text-red-700 mt-2">{error || followError}</p>
+          <Button className="mt-4" onClick={() => navigate(-1)}>
+            Go Back
+          </Button>
         </div>
       </div>
     );
@@ -95,7 +99,11 @@ const UserProfile = ({ loggedIn, currentUserId }) => {
         <h1 className="text-3xl font-bold text-gray-900 mb-2">{user.username}</h1>
         <p className="text-gray-600">{user.name}</p>
         {loggedIn && !isOwnProfile && (
-          <Button className="mt-5" onClick={handleFollow}>
+          <Button
+            className="mt-5"
+            onClick={handleFollow}
+            disabled={followLoading || followActionLoading}
+          >
             {isFollowing ? "Unfollow" : "Follow"}
           </Button>
         )}
