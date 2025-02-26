@@ -1,4 +1,3 @@
-// App.jsx
 import { useState, useEffect, useCallback } from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -12,37 +11,25 @@ import UserProfile from "./components/user/UserProfile";
 import UserList from "./components/UserList";
 import useFetchPosts from "./hooks/useFetchPosts";
 
-const useAuth = () => {
+const App = () => {
   const [loggedIn, setLoggedIn] = useState(false);
   const [username, setUsername] = useState("");
-  const [currentUserId, setCurrentUserId] = useState(null); // Add this
+  const [currentUserId, setCurrentUserId] = useState(null);
+  const { posts, loading, error } = useFetchPosts();
+  const [localPosts, setLocalPosts] = useState(posts);
 
+  // Check localStorage on mount and update state
   useEffect(() => {
     const authToken = localStorage.getItem("authToken");
     const user = JSON.parse(localStorage.getItem("user"));
     if (authToken && user) {
       setLoggedIn(true);
       setUsername(user.username);
-      setCurrentUserId(user.id); // Set on mount
+      setCurrentUserId(user.id);
     }
-  }, []);
+  }, []); // Still runs on mount to handle refresh case
 
-  const logOut = () => {
-    setLoggedIn(false);
-    setUsername("");
-    setCurrentUserId(null);
-    localStorage.removeItem("user");
-    localStorage.removeItem("authToken");
-  };
-
-  return { loggedIn, username, currentUserId, setLoggedIn, setUsername, setCurrentUserId, logOut };
-};
-
-const App = () => {
-  const { loggedIn, username, currentUserId, setLoggedIn, setUsername, setCurrentUserId, logOut } = useAuth();
-  const { posts, loading, error } = useFetchPosts();
-  const [localPosts, setLocalPosts] = useState(posts);
-
+  // Update localPosts when posts from useFetchPosts change
   useEffect(() => {
     setLocalPosts(posts);
   }, [posts]);
@@ -59,6 +46,14 @@ const App = () => {
   const handleEdit = useCallback(() => {
     setLocalPosts(posts);
   }, [posts]);
+
+  const logOut = () => {
+    setLoggedIn(false);
+    setUsername("");
+    setCurrentUserId(null);
+    localStorage.removeItem("user");
+    localStorage.removeItem("authToken");
+  };
 
   if (loading) return <div>Loading...</div>;
   if (error) return <div>Error: {error}</div>;
@@ -104,13 +99,13 @@ const App = () => {
                   loggedIn={loggedIn}
                   setLoggedIn={setLoggedIn}
                   setUsername={setUsername}
-                  setCurrentUserId={setCurrentUserId} // Pass this
+                  setCurrentUserId={setCurrentUserId}
                 />
               }
             />
             <Route
               path="/posts/:postId"
-              element={<PostDetail loggedIn={loggedIn} />}
+              element={<PostDetail loggedIn={loggedIn} currentUserId={currentUserId} />}
             />
             <Route path="/search" element={<SearchResults />} />
             <Route

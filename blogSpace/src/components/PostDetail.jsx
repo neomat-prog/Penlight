@@ -205,7 +205,7 @@ const PostDetail = ({ loggedIn }) => {
               })}
             </p>
           </div>
-          {loggedIn && !isOwnProfile && (
+          {/* {loggedIn && !isOwnProfile && (
             <Button
               variant="outline"
               className="ml-4 text-gray-600 hover:text-gray-900 hover:bg-gray-100 h-8 px-3"
@@ -213,7 +213,7 @@ const PostDetail = ({ loggedIn }) => {
             >
               {isFollowing ? "Unfollow" : "Follow"}
             </Button>
-          )}
+          )} */}
         </div>
       </article>
 
