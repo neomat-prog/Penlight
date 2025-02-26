@@ -336,6 +336,10 @@ app.get("/posts/user/:userId", async (req, res) => {
 
 app.use("/users", usersRouter);
 
+app.get("*", (req, res) => {
+  res.sendFile(path.resolve(__dirname, "dist", "index.html"));
+});
+
 app.listen(PORT, () => {
   console.log(`Server is running on PORT:${PORT}`);
 });
