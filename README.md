@@ -40,6 +40,7 @@ Ever wanted to express your thoughts and feelings? Well, this app is for you! Pe
    ```bash
    npm run dev
 4. Set up environment variables:
+   ```bash
    Create a .env file in the Server directory.
    Add the following variables:
    MONGO_URI=your_mongodb_connection_string
