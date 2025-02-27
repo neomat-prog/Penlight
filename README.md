@@ -39,5 +39,11 @@ Ever wanted to express your thoughts and feelings? Well, this app is for you! Pe
 3. Run the front end seamlessly with the backend
    ```bash
    npm run dev
+4. Set up environment variables:
+   Create a .env file in the Server directory.
+   Add the following variables:
+   MONGO_URI=your_mongodb_connection_string
+   JWT_SECRET=your_jwt_secret_key
+   PORT=3000
    
    
