@@ -46,5 +46,7 @@ Ever wanted to express your thoughts and feelings? Well, this app is for you! Pe
    MONGO_URI=your_mongodb_connection_string
    JWT_SECRET=your_jwt_secret_key
    PORT=3000
-   
+
+
+TRADEMARK NEOMAT-PROG | KACPER BOŁDAK
    
