@@ -47,6 +47,20 @@ Ever wanted to express your thoughts and feelings? Well, this app is for you! Pe
    JWT_SECRET=your_jwt_secret_key
    PORT=3000
 
+### Testing 🧪
+To ensure the quality of the application, you can run the following tests:
+1. Enter the backend directory
+   ```bash
+   cd ./Server
+2. Prerequisites
+   ```bash
+   npm install --save-dev jest supertest mongodb-memory-server
+3. Unit Testing e.g
+4. ````bash
+   npm run test:register
+
+
+
 MIT License
 
 Copyright (c) 2025 Kacper Bołdak
